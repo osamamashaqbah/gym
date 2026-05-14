@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { I18nService } from '../../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-confirm-dialog',
@@ -19,9 +20,9 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
           </div>
         </div>
         <div class="dialog-actions">
-          <button class="btn btn-ghost" (click)="cancel.emit()">{{ cancelLabel }}</button>
+          <button class="btn btn-ghost" (click)="cancel.emit()">{{ cancelLabel || (i18n.t('common.cancel')) }}</button>
           <button class="btn" [class.btn-danger]="danger" [class.btn-primary]="!danger" (click)="confirm.emit()">
-            {{ confirmLabel }}
+            {{ confirmLabel || (i18n.t('common.confirm')) }}
           </button>
         </div>
       </div>
@@ -38,11 +39,12 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
   `]
 })
 export class ConfirmDialogComponent {
-  @Input() title = 'Are you sure?';
-  @Input() message = 'This action cannot be undone.';
-  @Input() confirmLabel = 'Confirm';
-  @Input() cancelLabel = 'Cancel';
+  @Input() title = '';
+  @Input() message = '';
+  @Input() confirmLabel = '';
+  @Input() cancelLabel = '';
   @Input() danger = false;
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
+  i18n = inject(I18nService);
 }

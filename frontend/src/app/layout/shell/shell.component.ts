@@ -4,10 +4,11 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { AuthService } from '../../core/services/auth.service';
 import { TopbarComponent } from '../topbar/topbar.component';
 import { UserRole } from '../../core/models/models';
+import { TPipe } from '../../core/i18n/t.pipe';
 
 interface NavItem {
   path: string;
-  label: string;
+  labelKey: string;
   icon: string;
   roles?: UserRole[];
 }
@@ -15,7 +16,7 @@ interface NavItem {
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TopbarComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TopbarComponent, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss']
@@ -30,13 +31,13 @@ export class ShellComponent {
   user = this.auth.user;
 
   private readonly allItems: NavItem[] = [
-    { path: '/dashboard',   label: 'Dashboard',    icon: 'space_dashboard' },
-    { path: '/members',     label: 'Members',      icon: 'groups' },
-    { path: '/memberships', label: 'Memberships',  icon: 'card_membership' },
-    { path: '/payments',    label: 'Payments',     icon: 'payments' },
-    { path: '/attendance',  label: 'Attendance',   icon: 'event_available' },
-    { path: '/reports',     label: 'Reports',      icon: 'bar_chart',  roles: ['Owner', 'Admin'] },
-    { path: '/settings',    label: 'Settings',     icon: 'settings',   roles: ['Owner', 'Admin'] },
+    { path: '/dashboard',   labelKey: 'nav.dashboard',    icon: 'space_dashboard' },
+    { path: '/members',     labelKey: 'nav.members',      icon: 'groups' },
+    { path: '/memberships', labelKey: 'nav.memberships',  icon: 'card_membership' },
+    { path: '/payments',    labelKey: 'nav.payments',     icon: 'payments' },
+    { path: '/attendance',  labelKey: 'nav.attendance',   icon: 'event_available' },
+    { path: '/reports',     labelKey: 'nav.reports',      icon: 'bar_chart',  roles: ['Owner', 'Admin'] },
+    { path: '/settings',    labelKey: 'nav.settings',     icon: 'settings',   roles: ['Owner', 'Admin'] },
   ];
 
   navItems = computed(() => {

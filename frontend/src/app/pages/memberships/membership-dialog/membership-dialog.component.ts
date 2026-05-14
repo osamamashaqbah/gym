@@ -3,65 +3,66 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { MembershipPlanDto } from '../../../core/models/models';
+import { TPipe } from '../../../core/i18n/t.pipe';
 
 @Component({
   selector: 'app-membership-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dialog-backdrop" (click)="close.emit()">
       <div class="dialog wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-        <h2>New Membership</h2>
+        <h2>{{ 'membershipDialog.title' | t }}</h2>
         <p style="color:var(--text-4);margin-top:4px;font-size:13px;">
-          Choose a plan and record any initial payment.
+          {{ 'membershipDialog.subtitle' | t }}
         </p>
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid" style="margin-top:24px;">
           <div class="form-field span-2">
-            <label>Plan *</label>
+            <label>{{ 'membershipDialog.plan' | t }} *</label>
             <div class="plan-cards">
               @for (p of plans(); track p.id) {
                 <label class="plan-card" [class.selected]="form.value.planId === p.id">
                   <input type="radio" formControlName="planId" [value]="p.id" />
                   <div class="plan-name">{{ p.name }}</div>
                   <div class="plan-price">{{ p.price | number:'1.2-2' }} <span>JOD</span></div>
-                  <div class="plan-meta">{{ p.durationInMonths }} {{ p.durationInMonths === 1 ? 'month' : 'months' }}</div>
+                  <div class="plan-meta">{{ p.durationInMonths }} {{ (p.durationInMonths === 1 ? 'planDuration.month' : 'planDuration.months') | t }}</div>
                 </label>
               }
             </div>
           </div>
 
           <div class="form-field">
-            <label>Start Date *</label>
+            <label>{{ 'membershipDialog.startDate' | t }} *</label>
             <input class="input" type="date" formControlName="startDate" />
           </div>
           <div class="form-field">
-            <label>Custom Price (optional)</label>
-            <input class="input" type="number" step="0.01" formControlName="customPrice" placeholder="Leave blank for plan price" />
+            <label>{{ 'membershipDialog.customPrice' | t }}</label>
+            <input class="input" type="number" step="0.01" formControlName="customPrice" [placeholder]="'membershipDialog.customPlaceholder' | t" />
           </div>
           <div class="form-field">
-            <label>Initial Payment</label>
+            <label>{{ 'membershipDialog.initialPayment' | t }}</label>
             <input class="input" type="number" step="0.01" formControlName="initialPayment" />
           </div>
           <div class="form-field">
-            <label>Payment Method</label>
+            <label>{{ 'membershipDialog.paymentMethod' | t }}</label>
             <select class="input" formControlName="paymentMethod">
-              <option [ngValue]="1">Cash</option>
-              <option [ngValue]="2">Visa</option>
-              <option [ngValue]="3">CliQ</option>
+              <option [ngValue]="1">{{ 'paymentMethod.cash' | t }}</option>
+              <option [ngValue]="2">{{ 'paymentMethod.visa' | t }}</option>
+              <option [ngValue]="3">{{ 'paymentMethod.cliq' | t }}</option>
             </select>
           </div>
           <div class="form-field span-2">
-            <label>Notes</label>
+            <label>{{ 'membershipDialog.notes' | t }}</label>
             <textarea class="input" formControlName="notes" rows="2"></textarea>
           </div>
 
           <div class="dialog-actions span-2">
-            <button type="button" class="btn btn-ghost" (click)="close.emit()">Cancel</button>
+            <button type="button" class="btn btn-ghost" (click)="close.emit()">{{ 'common.cancel' | t }}</button>
             <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
               @if (saving()) { <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span> }
-              @else { Create membership }
+              @else { {{ 'membershipDialog.create' | t }} }
             </button>
           </div>
         </form>
@@ -89,12 +90,12 @@ import { MembershipPlanDto } from '../../../core/models/models';
     .plan-card.selected::after {
       content: 'check_circle';
       font-family: 'Material Icons Round';
-      position: absolute; top: 8px; right: 8px;
+      position: absolute; top: 8px; inset-inline-end: 8px;
       color: var(--silver-1); font-size: 18px;
     }
     .plan-name { font-weight: 600; color: var(--text-1); font-size: 13.5px; margin-bottom: 4px; }
     .plan-price { font-family: 'Space Grotesk',sans-serif; font-size: 22px; font-weight: 700; color: var(--text-1); }
-    .plan-price span { font-size: 11px; color: var(--text-4); margin-left: 2px; font-weight: 500; }
+    .plan-price span { font-size: 11px; color: var(--text-4); margin-inline-start: 2px; font-weight: 500; }
     .plan-meta { color: var(--text-4); font-size: 11.5px; margin-top: 2px; }
     @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .span-2 { grid-column: 1; } }
   `]

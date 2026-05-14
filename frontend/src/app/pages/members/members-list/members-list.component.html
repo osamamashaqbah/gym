@@ -1,12 +1,12 @@
 <div class="page fade-in">
   <div class="page-header">
     <div>
-      <h1 class="page-title">Members</h1>
-      <p class="page-subtitle">Manage your gym members and their memberships</p>
+      <h1 class="page-title">{{ 'members.title' | t }}</h1>
+      <p class="page-subtitle">{{ 'members.subtitle' | t }}</p>
     </div>
     @if (canEdit()) {
       <button class="btn btn-primary" (click)="openCreate()">
-        <span class="material-icons-round">person_add</span> Add Member
+        <span class="material-icons-round">person_add</span> {{ 'members.addMember' | t }}
       </button>
     }
   </div>
@@ -15,18 +15,18 @@
     <div class="filters">
       <div class="search-field">
         <span class="material-icons-round">search</span>
-        <input class="input" placeholder="Search by name, phone, or email..."
+        <input class="input" [placeholder]="'members.searchPlaceholder' | t"
                [value]="search()" (input)="onSearch($event)" />
       </div>
       <select class="input status-filter" [value]="statusFilter()" (change)="onStatusChange($event)">
-        <option value="">All statuses</option>
-        <option value="Active">Active</option>
-        <option value="Expired">Expired</option>
-        <option value="Frozen">Frozen</option>
-        <option value="Cancelled">Cancelled</option>
+        <option value="">{{ 'members.allStatuses' | t }}</option>
+        <option value="Active">{{ 'status.active' | t }}</option>
+        <option value="Expired">{{ 'status.expired' | t }}</option>
+        <option value="Frozen">{{ 'status.frozen' | t }}</option>
+        <option value="Cancelled">{{ 'status.cancelled' | t }}</option>
       </select>
       <button class="btn btn-ghost" (click)="reset()" *ngIf="search() || statusFilter()">
-        <span class="material-icons-round">close</span> Clear
+        <span class="material-icons-round">close</span> {{ 'common.clear' | t }}
       </button>
     </div>
   </div>
@@ -35,26 +35,26 @@
     @if (loading()) {
       <div class="loading-state">
         <span class="spinner"></span>
-        <span>Loading members...</span>
+        <span>{{ 'members.loadingMembers' | t }}</span>
       </div>
     } @else if (paged().items.length === 0) {
       <div class="empty-state">
         <span class="material-icons-round">groups</span>
-        <h3>No members found</h3>
-        <p>{{ search() || statusFilter() ? 'Try adjusting your filters' : 'Get started by adding your first member' }}</p>
+        <h3>{{ 'members.noMembersFound' | t }}</h3>
+        <p>{{ search() || statusFilter() ? ('members.tryAdjusting' | t) : ('members.getStartedAdd' | t) }}</p>
       </div>
     } @else {
       <div class="table-wrap">
         <table class="table">
           <thead>
             <tr>
-              <th>Member</th>
-              <th>Phone</th>
-              <th>Plan</th>
-              <th>Status</th>
-              <th>Expiry</th>
-              <th>Joined</th>
-              <th class="actions-col">Actions</th>
+              <th>{{ 'members.member' | t }}</th>
+              <th>{{ 'members.phone' | t }}</th>
+              <th>{{ 'members.plan' | t }}</th>
+              <th>{{ 'memberForm.gender' | t }}</th>
+              <th>{{ 'members.expiry' | t }}</th>
+              <th>{{ 'members.joinedCol' | t }}</th>
+              <th class="actions-col">{{ 'common.actions' | t }}</th>
             </tr>
           </thead>
           <tbody>
@@ -78,25 +78,25 @@
                       [class.badge-expired]="m.currentStatus === 2"
                       [class.badge-frozen]="m.currentStatus === 3"
                       [class.badge-cancelled]="m.currentStatus === 4">
-                      {{ statusLabel(m.currentStatus) }}
+                      {{ statusKey(m.currentStatus) | t }}
                     </span>
                   } @else {
-                    <span class="badge badge-cancelled">No Plan</span>
+                    <span class="badge badge-cancelled">{{ 'status.noPlan' | t }}</span>
                   }
                 </td>
                 <td>{{ m.membershipExpiryDate ? (m.membershipExpiryDate | date:'mediumDate') : '—' }}</td>
                 <td>{{ m.joinedAt | date:'mediumDate' }}</td>
                 <td class="actions-col" (click)="$event.stopPropagation()">
-                  <button class="btn btn-ghost btn-icon" (click)="goTo(m)" title="View profile">
+                  <button class="btn btn-ghost btn-icon" (click)="goTo(m)" [title]="'members.viewProfile' | t">
                     <span class="material-icons-round">visibility</span>
                   </button>
                   @if (canEdit()) {
-                    <button class="btn btn-ghost btn-icon" (click)="openEdit(m)" title="Edit">
+                    <button class="btn btn-ghost btn-icon" (click)="openEdit(m)" [title]="'common.edit' | t">
                       <span class="material-icons-round">edit</span>
                     </button>
                   }
                   @if (canDelete()) {
-                    <button class="btn btn-ghost btn-icon" (click)="confirmArchive(m)" title="Archive">
+                    <button class="btn btn-ghost btn-icon" (click)="confirmArchive(m)" [title]="'members.archive' | t">
                       <span class="material-icons-round">archive</span>
                     </button>
                   }
@@ -109,8 +109,8 @@
 
       <div class="pagination">
         <div class="page-info">
-          Showing {{ (paged().page - 1) * paged().pageSize + 1 }}–{{ pageEndIndex() }}
-          of <strong>{{ paged().totalCount }}</strong> members
+          {{ 'members.showing' | t }} {{ (paged().page - 1) * paged().pageSize + 1 }}–{{ pageEndIndex() }}
+          {{ 'common.of' | t }} <strong>{{ paged().totalCount }}</strong> {{ 'members.members' | t }}
         </div>
         <div class="page-controls">
           <button class="btn btn-ghost btn-sm" [disabled]="page() === 1" (click)="setPage(1)">
@@ -140,9 +140,10 @@
 
   @if (toArchive()) {
     <app-confirm-dialog
-      title="Archive member?"
-      [message]="'Archive ' + toArchive()!.fullName + '? They will be hidden from active lists but their history is preserved.'"
-      confirmLabel="Archive"
+      [title]="'members.archiveConfirmTitle' | t"
+      [message]="archiveMessage()"
+      [confirmLabel]="'members.archiveButton' | t"
+      [cancelLabel]="'common.cancel' | t"
       [danger]="true"
       (cancel)="toArchive.set(null)"
       (confirm)="doArchive()" />

@@ -5,6 +5,11 @@
     <div class="grid"></div>
   </div>
 
+  <button type="button" class="lang-corner" (click)="i18n.toggle()">
+    <span class="material-icons-round">language</span>
+    <span>{{ i18n.lang() === 'en' ? 'العربية' : 'English' }}</span>
+  </button>
+
   <div class="auth-card fade-in">
     <div class="brand">
       <div class="brand-mark">
@@ -16,20 +21,20 @@
       </div>
     </div>
 
-    <h1 class="auth-title">Welcome back</h1>
-    <p class="auth-subtitle">Sign in to access your gym command center</p>
+    <h1 class="auth-title">{{ 'auth.welcomeBack' | t }}</h1>
+    <p class="auth-subtitle">{{ 'auth.signInSubtitle' | t }}</p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="col gap-4" style="margin-top: 28px;">
       <div class="form-field">
-        <label for="username">Username or Email</label>
+        <label for="username">{{ 'auth.usernameOrEmail' | t }}</label>
         <div class="input-icon">
           <span class="material-icons-round">person</span>
-          <input id="username" class="input" formControlName="username" autocomplete="username" placeholder="Enter your username" />
+          <input id="username" class="input" formControlName="username" autocomplete="username" [placeholder]="'auth.enterUsername' | t" />
         </div>
       </div>
 
       <div class="form-field">
-        <label for="password">Password</label>
+        <label for="password">{{ 'auth.password' | t }}</label>
         <div class="input-icon">
           <span class="material-icons-round">lock</span>
           <input id="password" class="input" [type]="showPassword() ? 'text' : 'password'"
@@ -41,14 +46,14 @@
       </div>
 
       <div class="row between" style="margin-top: -4px;">
-        <a routerLink="/forgot-password" class="forgot">Forgot password?</a>
+        <a routerLink="/forgot-password" class="forgot">{{ 'auth.forgotPassword' | t }}</a>
       </div>
 
       <button type="submit" class="btn btn-primary login-btn" [disabled]="form.invalid || loading()">
         @if (loading()) {
           <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span>
         } @else {
-          <span>Sign In</span>
+          <span>{{ 'auth.signIn' | t }}</span>
           <span class="material-icons-round">arrow_forward</span>
         }
       </button>

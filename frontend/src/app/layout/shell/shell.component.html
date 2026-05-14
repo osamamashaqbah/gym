@@ -21,9 +21,9 @@
     <nav class="nav">
       @for (item of navItems(); track item.path) {
         <a [routerLink]="item.path" routerLinkActive="active"
-           class="nav-item" (click)="closeMobile()" [title]="item.label">
+           class="nav-item" (click)="closeMobile()" [title]="item.labelKey | t">
           <span class="nav-icon material-icons-round">{{ item.icon }}</span>
-          @if (!collapsed()) { <span class="nav-label">{{ item.label }}</span> }
+          @if (!collapsed()) { <span class="nav-label">{{ item.labelKey | t }}</span> }
           <span class="nav-active-indicator"></span>
         </a>
       }
@@ -41,9 +41,9 @@
           }
         </div>
       }
-      <button class="btn btn-ghost btn-sm logout" (click)="logout()" [title]="'Logout'">
+      <button class="btn btn-ghost btn-sm logout" (click)="logout()" [title]="'nav.logout' | t">
         <span class="material-icons-round">logout</span>
-        @if (!collapsed()) { <span>Logout</span> }
+        @if (!collapsed()) { <span>{{ 'nav.logout' | t }}</span> }
       </button>
     </div>
   </aside>

@@ -1,0 +1,140 @@
+<div class="page fade-in">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'settings.title' | t }}</h1>
+      <p class="page-subtitle">{{ 'settings.subtitle' | t }}</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab" [class.active]="tab() === 'gym'" (click)="tab.set('gym')">{{ 'settings.gymInfo' | t }}</button>
+    <button class="tab" [class.active]="tab() === 'staff'" (click)="tab.set('staff')">{{ 'settings.staffRoles' | t }}</button>
+    <button class="tab" [class.active]="tab() === 'account'" (click)="tab.set('account')">{{ 'settings.myAccount' | t }}</button>
+  </div>
+
+  @if (tab() === 'gym') {
+    <div class="card">
+      <h3 style="margin-bottom: 16px;">{{ 'settings.gymInfo' | t }}</h3>
+      @if (loadingGym()) {
+        <div style="display:grid;place-items:center;padding:40px;"><span class="spinner"></span></div>
+      } @else {
+        <form [formGroup]="gymForm" (ngSubmit)="saveGym()" class="form-grid">
+          <div class="form-field"><label>{{ 'settings.gymName' | t }} *</label><input class="input" formControlName="gymName" /></div>
+          <div class="form-field"><label>{{ 'settings.currency' | t }} *</label><input class="input" formControlName="currency" maxlength="10" /></div>
+          <div class="form-field span-2"><label>{{ 'settings.address' | t }}</label><input class="input" formControlName="address" /></div>
+          <div class="form-field"><label>{{ 'settings.phone' | t }}</label><input class="input" formControlName="phoneNumber" /></div>
+          <div class="form-field"><label>{{ 'settings.email' | t }}</label><input class="input" type="email" formControlName="email" /></div>
+          <div class="form-field"><label>{{ 'settings.taxNumber' | t }}</label><input class="input" formControlName="taxNumber" /></div>
+          <div class="form-field"><label>{{ 'settings.website' | t }}</label><input class="input" formControlName="website" /></div>
+          <div class="form-field span-2"><label>{{ 'settings.logoUrl' | t }}</label><input class="input" formControlName="logoUrl" /></div>
+          <div class="span-2 row gap-3" style="justify-content: flex-end;">
+            <button class="btn btn-primary" [disabled]="gymForm.invalid || savingGym()">
+              @if (savingGym()) { <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span> }
+              @else { {{ 'settings.saveChanges' | t }} }
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+
+  @if (tab() === 'staff') {
+    <div class="card">
+      <div class="row between" style="margin-bottom: 14px;">
+        <h3>{{ 'settings.staffRoles' | t }}</h3>
+        <button class="btn btn-primary" (click)="openStaff(null)">
+          <span class="material-icons-round">person_add</span> {{ 'settings.newUser' | t }}
+        </button>
+      </div>
+      @if (loadingStaff()) {
+        <div style="display:grid;place-items:center;padding:40px;"><span class="spinner"></span></div>
+      } @else {
+        <table class="table">
+          <thead><tr><th>{{ 'settings.user' | t }}</th><th>{{ 'settings.username' | t }}</th><th>{{ 'settings.role' | t }}</th><th>{{ 'common.actions' | t }}</th><th>{{ 'settings.lastLogin' | t }}</th><th></th></tr></thead>
+          <tbody>
+            @for (s of staff(); track s.id) {
+              <tr>
+                <td>
+                  <div class="name-cell">
+                    <div class="avatar">{{ s.fullName.charAt(0) }}</div>
+                    <div>
+                      <div style="color:var(--text-1);font-weight:600;">{{ s.fullName }}</div>
+                      <div style="color:var(--text-4);font-size:11.5px;">{{ s.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="mono">{{ s.username }}</span></td>
+                <td>
+                  <span class="badge" [class.badge-active]="s.role === 'Owner'">{{ s.role }}</span>
+                </td>
+                <td>
+                  @if (s.isActive) { <span class="badge badge-active">{{ 'status.active' | t }}</span> }
+                  @else { <span class="badge badge-cancelled">{{ 'status.disabled' | t }}</span> }
+                </td>
+                <td>{{ s.lastLoginAt ? (s.lastLoginAt | date:'short') : '—' }}</td>
+                <td style="text-align:end;">
+                  <button class="btn btn-ghost btn-icon" (click)="openStaff(s)"><span class="material-icons-round">edit</span></button>
+                  @if (canDelete(s)) {
+                    <button class="btn btn-ghost btn-icon" (click)="deleteStaff(s)"><span class="material-icons-round">delete</span></button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  }
+
+  @if (tab() === 'account') {
+    <div class="card">
+      <h3 style="margin-bottom: 16px;">{{ 'settings.changePassword' | t }}</h3>
+      <form [formGroup]="pwdForm" (ngSubmit)="changePassword()" class="col gap-4" style="max-width: 480px;">
+        <div class="form-field"><label>{{ 'settings.currentPassword' | t }} *</label><input class="input" type="password" formControlName="oldPassword" /></div>
+        <div class="form-field"><label>{{ 'settings.newPassword' | t }} *</label><input class="input" type="password" formControlName="newPassword" /></div>
+        <div class="row gap-3" style="justify-content:flex-start;">
+          <button class="btn btn-primary" [disabled]="pwdForm.invalid || changingPwd()">
+            @if (changingPwd()) { <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span> }
+            @else { {{ 'settings.updatePassword' | t }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (showStaffDialog()) {
+    <div class="dialog-backdrop" (click)="closeStaff()">
+      <div class="dialog" (click)="$event.stopPropagation()">
+        <h2>{{ (editingStaff() ? 'settings.editUser' : 'settings.newUser') | t }}</h2>
+        <form [formGroup]="staffForm" (ngSubmit)="saveStaff()" class="col gap-4" style="margin-top: 20px;">
+          <div class="form-field"><label>{{ 'settings.fullName' | t }} *</label><input class="input" formControlName="fullName" /></div>
+          <div class="form-field"><label>{{ 'settings.email' | t }} *</label><input class="input" type="email" formControlName="email" /></div>
+          @if (!editingStaff()) {
+            <div class="form-field"><label>{{ 'settings.username' | t }} *</label><input class="input" formControlName="username" /></div>
+            <div class="form-field"><label>{{ 'settings.password' | t }} *</label><input class="input" type="password" formControlName="password" /></div>
+          }
+          <div class="form-field"><label>{{ 'settings.phone' | t }}</label><input class="input" formControlName="phoneNumber" /></div>
+          <div class="form-field">
+            <label>{{ 'settings.role' | t }} *</label>
+            <select class="input" formControlName="role">
+              <option value="Owner">Owner</option>
+              <option value="Admin">Admin</option>
+              <option value="Reception">Reception</option>
+              <option value="Coach">Coach</option>
+            </select>
+          </div>
+          @if (editingStaff()) {
+            <div class="form-field"><label class="row gap-2"><input type="checkbox" formControlName="isActive" /> {{ 'memberships.isActive' | t }}</label></div>
+          }
+          <div class="dialog-actions">
+            <button type="button" class="btn btn-ghost" (click)="closeStaff()">{{ 'common.cancel' | t }}</button>
+            <button class="btn btn-primary" [disabled]="staffForm.invalid || savingStaff()">
+              @if (savingStaff()) { <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span> }
+              @else { {{ 'common.save' | t }} }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

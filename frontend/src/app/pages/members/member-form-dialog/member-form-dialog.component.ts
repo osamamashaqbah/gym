@@ -3,54 +3,55 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { MemberDto, MembershipPlanDto } from '../../../core/models/models';
+import { TPipe } from '../../../core/i18n/t.pipe';
 
 @Component({
   selector: 'app-member-form-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dialog-backdrop" (click)="close.emit()">
       <div class="dialog wide" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-        <h2>{{ member ? 'Edit Member' : 'New Member' }}</h2>
+        <h2>{{ (member ? 'memberForm.edit' : 'memberForm.new') | t }}</h2>
         <p style="color: var(--text-4); margin-top: 4px; font-size: 13px;">
-          {{ member ? 'Update member information' : 'Add a new member to your gym' }}
+          {{ (member ? 'memberForm.editSubtitle' : 'memberForm.newSubtitle') | t }}
         </p>
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
           <div class="form-field span-2">
-            <label>Full Name *</label>
-            <input class="input" formControlName="fullName" placeholder="e.g. Omar Khoury" />
+            <label>{{ 'memberForm.fullName' | t }} *</label>
+            <input class="input" formControlName="fullName" [placeholder]="'memberForm.fullNamePlaceholder' | t" />
           </div>
           <div class="form-field">
-            <label>Phone Number *</label>
-            <input class="input" formControlName="phoneNumber" placeholder="+962 79 ..." />
+            <label>{{ 'memberForm.phoneNumber' | t }} *</label>
+            <input class="input" formControlName="phoneNumber" [placeholder]="'memberForm.phonePlaceholder' | t" />
           </div>
           <div class="form-field">
-            <label>Email</label>
-            <input class="input" type="email" formControlName="email" placeholder="optional" />
+            <label>{{ 'memberForm.email' | t }}</label>
+            <input class="input" type="email" formControlName="email" [placeholder]="'common.optional' | t" />
           </div>
           <div class="form-field">
-            <label>Gender *</label>
+            <label>{{ 'memberForm.gender' | t }} *</label>
             <select class="input" formControlName="gender">
-              <option [ngValue]="1">Male</option>
-              <option [ngValue]="2">Female</option>
-              <option [ngValue]="3">Other</option>
+              <option [ngValue]="1">{{ 'gender.male' | t }}</option>
+              <option [ngValue]="2">{{ 'gender.female' | t }}</option>
+              <option [ngValue]="3">{{ 'gender.other' | t }}</option>
             </select>
           </div>
           <div class="form-field">
-            <label>Age *</label>
+            <label>{{ 'memberForm.age' | t }} *</label>
             <input class="input" type="number" formControlName="age" min="5" max="120" />
           </div>
           <div class="form-field span-2">
-            <label>Address</label>
-            <input class="input" formControlName="address" placeholder="optional" />
+            <label>{{ 'memberForm.address' | t }}</label>
+            <input class="input" formControlName="address" [placeholder]="'common.optional' | t" />
           </div>
           @if (!member) {
             <div class="form-field span-2">
-              <label>Initial Plan</label>
+              <label>{{ 'memberForm.initialPlan' | t }}</label>
               <select class="input" formControlName="planId">
-                <option [ngValue]="null">— No plan (assign later) —</option>
+                <option [ngValue]="null">{{ 'memberForm.noPlanLater' | t }}</option>
                 @for (p of plans(); track p.id) {
                   <option [ngValue]="p.id">{{ p.name }} · {{ p.price | number:'1.2-2' }} JOD · {{ p.durationInMonths }} mo</option>
                 }
@@ -58,15 +59,15 @@ import { MemberDto, MembershipPlanDto } from '../../../core/models/models';
             </div>
           }
           <div class="form-field span-2">
-            <label>Notes</label>
-            <textarea class="input" formControlName="notes" rows="3" placeholder="Health info, preferences, etc."></textarea>
+            <label>{{ 'memberForm.notes' | t }}</label>
+            <textarea class="input" formControlName="notes" rows="3" [placeholder]="'memberForm.notesPlaceholder' | t"></textarea>
           </div>
 
           <div class="dialog-actions span-2" style="margin-top: 8px;">
-            <button type="button" class="btn btn-ghost" (click)="close.emit()">Cancel</button>
+            <button type="button" class="btn btn-ghost" (click)="close.emit()">{{ 'common.cancel' | t }}</button>
             <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
               @if (saving()) { <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span> }
-              @else { {{ member ? 'Save changes' : 'Create member' }} }
+              @else { {{ (member ? 'memberForm.saveChanges' : 'memberForm.create') | t }} }
             </button>
           </div>
         </form>
@@ -113,7 +114,6 @@ export class MemberFormDialogComponent implements OnInit {
   ngOnInit() {
     this.api.getPlans().subscribe(p => this.plans.set(p.filter(x => x.isActive)));
     if (this.member) {
-      // Normalise nullable fields (null → '') for the non-nullable form.
       this.form.patchValue({
         fullName: this.member.fullName,
         phoneNumber: this.member.phoneNumber,

@@ -5,14 +5,16 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { MemberDto, MembershipStatus, PagedResult, StatusLabels } from '../../../core/models/models';
+import { I18nService } from '../../../core/i18n/i18n.service';
+import { TPipe } from '../../../core/i18n/t.pipe';
+import { MemberDto, MembershipStatus, PagedResult } from '../../../core/models/models';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MemberFormDialogComponent } from '../member-form-dialog/member-form-dialog.component';
 
 @Component({
   selector: 'app-members-list',
   standalone: true,
-  imports: [CommonModule, DatePipe, MemberFormDialogComponent, ConfirmDialogComponent],
+  imports: [CommonModule, DatePipe, MemberFormDialogComponent, ConfirmDialogComponent, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './members-list.component.html',
   styleUrls: ['./members-list.component.scss']
@@ -22,6 +24,7 @@ export class MembersListComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   loading = signal(true);
   page = signal(1);
@@ -36,6 +39,11 @@ export class MembersListComponent {
   showForm = signal(false);
   editing = signal<MemberDto | null>(null);
   toArchive = signal<MemberDto | null>(null);
+
+  archiveMessage = computed(() => {
+    const m = this.toArchive();
+    return m ? this.i18n.t('members.archiveConfirmMessage', { name: m.fullName }) : '';
+  });
 
   canEdit = computed(() => this.auth.hasRole(['Owner', 'Admin', 'Reception']));
   canDelete = computed(() => this.auth.hasRole(['Owner', 'Admin']));
@@ -93,7 +101,9 @@ export class MembersListComponent {
   closeForm() { this.showForm.set(false); }
 
   onSaved() {
-    this.toast.success(this.editing() ? 'Member updated' : 'Member created');
+    this.toast.success(this.editing()
+      ? this.i18n.t('toast.memberUpdated')
+      : this.i18n.t('toast.memberCreated'));
     this.closeForm();
     this.load();
   }
@@ -103,11 +113,16 @@ export class MembersListComponent {
     const m = this.toArchive();
     if (!m) return;
     this.api.archiveMember(m.id).subscribe(() => {
-      this.toast.success(`${m.fullName} archived`);
+      this.toast.success(this.i18n.t('toast.memberArchived', { name: m.fullName }));
       this.toArchive.set(null);
       this.load();
     });
   }
 
-  statusLabel(s: MembershipStatus) { return StatusLabels[s]; }
+  statusKey(s: MembershipStatus): string {
+    return s === 1 ? 'status.active'
+         : s === 2 ? 'status.expired'
+         : s === 3 ? 'status.frozen'
+         : 'status.cancelled';
+  }
 }

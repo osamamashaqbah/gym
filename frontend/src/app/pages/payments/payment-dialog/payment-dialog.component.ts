@@ -3,62 +3,61 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../../../core/services/api.service';
 import { MembershipDto, PaymentMethod } from '../../../core/models/models';
+import { TPipe } from '../../../core/i18n/t.pipe';
 
 @Component({
   selector: 'app-payment-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="dialog-backdrop" (click)="close.emit()">
       <div class="dialog" (click)="$event.stopPropagation()">
-        <h2>Add Payment</h2>
-        <p style="color:var(--text-4);margin-top:4px;font-size:13px;">
-          Record a new payment for this member.
-        </p>
+        <h2>{{ 'paymentDialog.title' | t }}</h2>
+        <p style="color:var(--text-4);margin-top:4px;font-size:13px;">{{ 'paymentDialog.subtitle' | t }}</p>
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="col gap-4" style="margin-top:20px;">
           @if (memberships.length > 0) {
             <div class="form-field">
-              <label>Apply to membership</label>
+              <label>{{ 'paymentDialog.applyTo' | t }}</label>
               <select class="input" formControlName="membershipId">
-                <option [ngValue]="null">— Standalone payment —</option>
+                <option [ngValue]="null">{{ 'paymentDialog.standalone' | t }}</option>
                 @for (m of memberships; track m.id) {
-                  <option [ngValue]="m.id">{{ m.planName }} (balance: {{ m.remainingBalance | number:'1.2-2' }} JOD)</option>
+                  <option [ngValue]="m.id">{{ m.planName }} ({{ 'paymentDialog.balance' | t }}: {{ m.remainingBalance | number:'1.2-2' }} JOD)</option>
                 }
               </select>
             </div>
           }
           <div class="form-field">
-            <label>Amount (JOD) *</label>
+            <label>{{ 'paymentDialog.amount' | t }} *</label>
             <input class="input" type="number" step="0.01" min="0.01" formControlName="amount" autofocus />
           </div>
           <div class="form-field">
-            <label>Method *</label>
+            <label>{{ 'paymentDialog.method' | t }} *</label>
             <div class="method-picker">
               @for (m of methods; track m.value) {
                 <label class="method" [class.selected]="form.value.method === m.value">
                   <input type="radio" formControlName="method" [value]="m.value" />
                   <span class="material-icons-round">{{ m.icon }}</span>
-                  <span>{{ m.label }}</span>
+                  <span>{{ m.labelKey | t }}</span>
                 </label>
               }
             </div>
           </div>
           <div class="form-field">
-            <label>Reference Number</label>
-            <input class="input" formControlName="referenceNumber" placeholder="optional" />
+            <label>{{ 'paymentDialog.referenceNumber' | t }}</label>
+            <input class="input" formControlName="referenceNumber" [placeholder]="'common.optional' | t" />
           </div>
           <div class="form-field">
-            <label>Notes</label>
+            <label>{{ 'paymentDialog.notes' | t }}</label>
             <textarea class="input" formControlName="notes" rows="2"></textarea>
           </div>
 
           <div class="dialog-actions">
-            <button type="button" class="btn btn-ghost" (click)="close.emit()">Cancel</button>
+            <button type="button" class="btn btn-ghost" (click)="close.emit()">{{ 'common.cancel' | t }}</button>
             <button type="submit" class="btn btn-primary" [disabled]="form.invalid || saving()">
               @if (saving()) { <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span> }
-              @else { Record payment }
+              @else { {{ 'paymentDialog.record' | t }} }
             </button>
           </div>
         </form>
@@ -98,10 +97,10 @@ export class PaymentDialogComponent {
 
   saving = signal(false);
 
-  methods: { value: PaymentMethod; label: string; icon: string }[] = [
-    { value: 1, label: 'Cash',  icon: 'payments' },
-    { value: 2, label: 'Visa',  icon: 'credit_card' },
-    { value: 3, label: 'CliQ',  icon: 'qr_code_2' }
+  methods: { value: PaymentMethod; labelKey: string; icon: string }[] = [
+    { value: 1, labelKey: 'paymentMethod.cash',  icon: 'payments' },
+    { value: 2, labelKey: 'paymentMethod.visa',  icon: 'credit_card' },
+    { value: 3, labelKey: 'paymentMethod.cliq',  icon: 'qr_code_2' }
   ];
 
   form = this.fb.nonNullable.group({

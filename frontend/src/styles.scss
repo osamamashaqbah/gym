@@ -88,6 +88,22 @@ html, body {
   font-feature-settings: 'cv11','ss01','ss02';
 }
 
+/* Arabic uses Cairo (or Tajawal as a fallback) — both are bundled
+   from Google Fonts via the <link> tag in index.html and chosen
+   reactively when <html dir="rtl"> is applied by I18nService. */
+html[dir="rtl"], html[dir="rtl"] body {
+  font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+  letter-spacing: 0;
+}
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+html[dir="rtl"] h5 {
+  font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
 body {
   background:
     radial-gradient(1200px 600px at 90% -10%, rgba(46, 160, 255, 0.08), transparent 60%),
@@ -261,6 +277,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: rgba(255,255,255,0.02);
   position: sticky; top: 0; z-index: 1;
 }
+html[dir="rtl"] .table thead th { text-align: right; letter-spacing: 0; }
 .table tbody td {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
@@ -379,3 +396,30 @@ textarea.input { resize: vertical; min-height: 80px; }
   .page { padding: 18px 16px; }
   .card { padding: 18px; }
 }
+
+/* ============================================================
+   RTL adjustments — applied automatically when I18nService sets
+   <html dir="rtl">. We tone down letter-spacing/uppercase rules
+   that hurt Arabic legibility and fix a few directional alignments
+   the rest of the styles assume.
+   ============================================================ */
+html[dir="rtl"] .form-field label,
+html[dir="rtl"] .card-title,
+html[dir="rtl"] .badge,
+html[dir="rtl"] .qlabel,
+html[dir="rtl"] .stat-label,
+html[dir="rtl"] .now-date,
+html[dir="rtl"] .user-role,
+html[dir="rtl"] .profile-role,
+html[dir="rtl"] .brand-tag,
+html[dir="rtl"] .brand-name {
+  text-transform: none;
+  letter-spacing: 0;
+}
+html[dir="rtl"] .toast-host { right: auto; left: 24px; }
+html[dir="rtl"] .login-btn .material-icons-round { transform: scaleX(-1); }
+html[dir="rtl"] .back-link .material-icons-round,
+html[dir="rtl"] .list-head .link .material-icons-round { transform: scaleX(-1); }
+html[dir="rtl"] .toggle { right: auto; left: 6px; }
+html[dir="rtl"] .input-icon .input { padding-left: 14px; padding-right: 42px; }
+html[dir="rtl"] .input-icon > .material-icons-round { left: auto; right: 14px; }

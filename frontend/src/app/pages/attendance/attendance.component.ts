@@ -1,21 +1,23 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ToastService } from '../../core/services/toast.service';
+import { I18nService } from '../../core/i18n/i18n.service';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models';
 
 @Component({
   selector: 'app-attendance',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page fade-in">
       <div class="page-header">
         <div>
-          <h1 class="page-title">Attendance</h1>
-          <p class="page-subtitle">Search a member and check them in instantly.</p>
+          <h1 class="page-title">{{ 'attendance.title' | t }}</h1>
+          <p class="page-subtitle">{{ 'attendance.subtitle' | t }}</p>
         </div>
       </div>
 
@@ -24,12 +26,12 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
           <div class="checkin-icon">
             <span class="material-icons-round">how_to_reg</span>
           </div>
-          <h2>Quick Check-in</h2>
-          <p style="color:var(--text-4);margin-top:6px;">Type a name or phone to find a member.</p>
+          <h2>{{ 'attendance.quickCheckIn' | t }}</h2>
+          <p style="color:var(--text-4);margin-top:6px;">{{ 'attendance.quickSubtitle' | t }}</p>
 
           <div class="search-shell" style="margin-top:18px;">
             <span class="material-icons-round search-icon">search</span>
-            <input class="input lg" placeholder="Search member..." [value]="query()" (input)="onSearch($event)" autofocus />
+            <input class="input lg" [placeholder]="'attendance.searchMember' | t" [value]="query()" (input)="onSearch($event)" autofocus />
           </div>
 
           @if (query() && results().length > 0) {
@@ -39,7 +41,7 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
                   <div class="avatar">{{ m.fullName.charAt(0) }}</div>
                   <div class="grow">
                     <div class="name">{{ m.fullName }}</div>
-                    <div class="meta">{{ m.phoneNumber }} · {{ m.currentPlanName || 'No plan' }}</div>
+                    <div class="meta">{{ m.phoneNumber }} · {{ m.currentPlanName || ('attendance.noPlan' | t) }}</div>
                   </div>
                   <span class="badge"
                     [class.badge-active]="m.currentStatus === 1"
@@ -47,16 +49,16 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
                     [class.badge-frozen]="m.currentStatus === 3"
                     [class.badge-cancelled]="!m.currentStatus || m.currentStatus === 4">
                     @switch (m.currentStatus) {
-                      @case (1) { Active }
-                      @case (2) { Expired }
-                      @case (3) { Frozen }
-                      @case (4) { Cancelled }
-                      @default  { No Plan }
+                      @case (1) { {{ 'status.active' | t }} }
+                      @case (2) { {{ 'status.expired' | t }} }
+                      @case (3) { {{ 'status.frozen' | t }} }
+                      @case (4) { {{ 'status.cancelled' | t }} }
+                      @default  { {{ 'status.noPlan' | t }} }
                     }
                   </span>
                   <button class="btn btn-success btn-sm" (click)="checkIn(m)" [disabled]="m.currentStatus !== 1 || checking() === m.id">
                     @if (checking() === m.id) { <span class="spinner" style="width:14px;height:14px;border-width:2px;"></span> }
-                    @else { <span class="material-icons-round">check</span> Check in }
+                    @else { <span class="material-icons-round">check</span> {{ 'attendance.checkInBtn' | t }} }
                   </button>
                 </div>
               }
@@ -64,20 +66,20 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
           } @else if (query() && !searching()) {
             <div class="empty-state" style="padding:32px;">
               <span class="material-icons-round">person_search</span>
-              <p>No matches found.</p>
+              <p>{{ 'attendance.noMatches' | t }}</p>
             </div>
           }
         </div>
 
         <div class="card today-card">
           <div class="row between" style="margin-bottom: 12px;">
-            <h3>Today's Check-ins</h3>
+            <h3>{{ 'attendance.todayCheckIns' | t }}</h3>
             <span class="badge badge-active">{{ today().length }}</span>
           </div>
           @if (today().length === 0) {
             <div class="empty-state" style="padding:24px;">
               <span class="material-icons-round">event_available</span>
-              <p>Nobody has checked in yet.</p>
+              <p>{{ 'attendance.noOneCheckedIn' | t }}</p>
             </div>
           } @else {
             <div class="today-list">
@@ -97,12 +99,12 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
       </div>
 
       <div class="card" style="margin-top: 22px;">
-        <h3 style="margin-bottom:14px;">Recent Attendance</h3>
+        <h3 style="margin-bottom:14px;">{{ 'attendance.recent' | t }}</h3>
         @if (recent().items.length === 0) {
-          <div class="empty-state"><span class="material-icons-round">history</span><p>No attendance records.</p></div>
+          <div class="empty-state"><span class="material-icons-round">history</span><p>{{ 'attendance.noRecords' | t }}</p></div>
         } @else {
           <table class="table">
-            <thead><tr><th>Member</th><th>Check-in Time</th><th>Notes</th></tr></thead>
+            <thead><tr><th>{{ 'payments.member' | t }}</th><th>{{ 'attendance.checkInTime' | t }}</th><th>{{ 'attendance.notes' | t }}</th></tr></thead>
             <tbody>
               @for (a of recent().items; track a.id) {
                 <tr>
@@ -137,8 +139,9 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
     }
     .checkin-icon .material-icons-round { font-size: 28px; }
     .search-shell { position: relative; }
-    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-4); }
+    .search-icon { position: absolute; inset-inline-start: 16px; top: 50%; transform: translateY(-50%); color: var(--text-4); }
     .input.lg { padding: 16px 16px 16px 48px; font-size: 15px; }
+    html[dir="rtl"] .input.lg { padding: 16px 48px 16px 16px; }
     .results { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; }
     .result-item {
       display: flex; align-items: center; gap: 14px;
@@ -168,6 +171,7 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
 export class AttendanceComponent {
   private api = inject(ApiService);
   private toast = inject(ToastService);
+  private i18n = inject(I18nService);
 
   query = signal('');
   searching = signal(false);
@@ -213,7 +217,7 @@ export class AttendanceComponent {
     this.checking.set(m.id);
     this.api.checkIn(m.id).subscribe({
       next: () => {
-        this.toast.success(`${m.fullName} checked in!`);
+        this.toast.success(this.i18n.t('toast.checkedInName', { name: m.fullName }));
         this.checking.set(null);
         this.query.set('');
         this.results.set([]);

@@ -6,12 +6,13 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ChartCardComponent } from '../../shared/components/chart-card/chart-card.component';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
-import { DashboardCharts, DashboardStats, MemberDto, PaymentDto, PaymentMethodLabels } from '../../core/models/models';
+import { DashboardCharts, DashboardStats, MemberDto, PaymentDto } from '../../core/models/models';
+import { TPipe } from '../../core/i18n/t.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DatePipe, DecimalPipe, StatCardComponent, ChartCardComponent],
+  imports: [CommonModule, RouterLink, DatePipe, DecimalPipe, StatCardComponent, ChartCardComponent, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -28,14 +29,16 @@ export class DashboardComponent {
   recentMembers = signal<MemberDto[]>([]);
   recentPayments = signal<PaymentDto[]>([]);
 
-  greeting = computed(() => {
+  greetingKey = computed(() => {
     const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (h < 12) return 'dashboard.morning';
+    if (h < 18) return 'dashboard.afternoon';
+    return 'dashboard.evening';
   });
 
-  PaymentMethodLabels = PaymentMethodLabels;
+  paymentMethodKey(m: number): string {
+    return m === 1 ? 'paymentMethod.cash' : m === 2 ? 'paymentMethod.visa' : 'paymentMethod.cliq';
+  }
 
   // Cached chart data
   revenueLabels = computed(() => this.charts()?.revenueLast12Months.map(p => p.label) ?? []);

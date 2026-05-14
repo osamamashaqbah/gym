@@ -2,33 +2,34 @@ import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
-import { PagedResult, PaymentDto, PaymentMethodLabels } from '../../core/models/models';
+import { TPipe } from '../../core/i18n/t.pipe';
+import { PagedResult, PaymentDto } from '../../core/models/models';
 
 @Component({
   selector: 'app-payments',
   standalone: true,
-  imports: [CommonModule, DatePipe, DecimalPipe],
+  imports: [CommonModule, DatePipe, DecimalPipe, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page fade-in">
       <div class="page-header">
         <div>
-          <h1 class="page-title">Payments</h1>
-          <p class="page-subtitle">Track every payment and access invoices.</p>
+          <h1 class="page-title">{{ 'payments.title' | t }}</h1>
+          <p class="page-subtitle">{{ 'payments.subtitle' | t }}</p>
         </div>
       </div>
 
       <div class="card" style="padding:18px;margin-bottom:18px;">
         <div class="row gap-3" style="flex-wrap: wrap;">
           <div style="position:relative;flex:1;min-width:240px;">
-            <span class="material-icons-round" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:18px;">search</span>
-            <input class="input" style="padding-left:42px;" placeholder="Search by member or invoice..."
+            <span class="material-icons-round" style="position:absolute;inset-inline-start:14px;top:50%;transform:translateY(-50%);color:var(--text-4);font-size:18px;">search</span>
+            <input class="input" style="padding-inline-start:42px;" [placeholder]="'payments.searchPlaceholder' | t"
                    [value]="search()" (input)="onSearch($event)" />
           </div>
           <input class="input" type="date" [value]="from()" (change)="onFrom($event)" style="width:170px;" />
           <input class="input" type="date" [value]="to()"   (change)="onTo($event)"   style="width:170px;" />
           @if (search() || from() || to()) {
-            <button class="btn btn-ghost" (click)="reset()"><span class="material-icons-round">close</span> Clear</button>
+            <button class="btn btn-ghost" (click)="reset()"><span class="material-icons-round">close</span> {{ 'common.clear' | t }}</button>
           }
         </div>
       </div>
@@ -39,20 +40,20 @@ import { PagedResult, PaymentDto, PaymentMethodLabels } from '../../core/models/
         } @else if (paged().items.length === 0) {
           <div class="empty-state">
             <span class="material-icons-round">receipt_long</span>
-            <h3>No payments found</h3>
-            <p>Try adjusting filters or record a new payment.</p>
+            <h3>{{ 'payments.noPaymentsFound' | t }}</h3>
+            <p>{{ 'payments.tryAdjustOrAdd' | t }}</p>
           </div>
         } @else {
           <div style="overflow:auto;">
             <table class="table">
               <thead>
                 <tr>
-                  <th>Invoice</th>
-                  <th>Member</th>
-                  <th>Plan</th>
-                  <th>Method</th>
-                  <th>Date</th>
-                  <th style="text-align:right;">Amount</th>
+                  <th>{{ 'payments.invoice' | t }}</th>
+                  <th>{{ 'payments.member' | t }}</th>
+                  <th>{{ 'payments.plan' | t }}</th>
+                  <th>{{ 'payments.method' | t }}</th>
+                  <th>{{ 'payments.date' | t }}</th>
+                  <th style="text-align:end;">{{ 'payments.amount' | t }}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -70,17 +71,17 @@ import { PagedResult, PaymentDto, PaymentMethodLabels } from '../../core/models/
                     <td>
                       <span class="row gap-2">
                         <span class="material-icons-round" style="font-size:16px;color:var(--silver-3);">{{ iconFor(p.method) }}</span>
-                        {{ PaymentMethodLabels[p.method] }}
+                        {{ paymentMethodKey(p.method) | t }}
                       </span>
                     </td>
                     <td>{{ p.paidAt | date:'medium' }}</td>
-                    <td style="text-align:right;">
+                    <td style="text-align:end;">
                       <strong style="font-family:'Space Grotesk',sans-serif;color:var(--green);">
                         {{ p.amount | number:'1.2-2' }} JOD
                       </strong>
                     </td>
                     <td>
-                      <button class="btn btn-ghost btn-icon" (click)="invoice(p)" title="Open invoice">
+                      <button class="btn btn-ghost btn-icon" (click)="invoice(p)" [title]="'payments.openInvoice' | t">
                         <span class="material-icons-round">print</span>
                       </button>
                     </td>
@@ -91,8 +92,8 @@ import { PagedResult, PaymentDto, PaymentMethodLabels } from '../../core/models/
           </div>
           <div class="pagination" style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-top:1px solid var(--border);">
             <div style="color:var(--text-4);font-size:12.5px;">
-              <strong style="color:var(--text-1);">{{ paged().totalCount }}</strong> total ·
-              {{ totalSum() | number:'1.2-2' }} JOD on this page
+              <strong style="color:var(--text-1);">{{ paged().totalCount }}</strong> {{ 'payments.total' | t }} ·
+              {{ totalSum() | number:'1.2-2' }} JOD {{ 'payments.onPage' | t }}
             </div>
             <div class="row gap-2">
               <button class="btn btn-ghost btn-sm" [disabled]="page() === 1" (click)="setPage(page() - 1)">
@@ -133,7 +134,6 @@ export class PaymentsComponent {
   paged = signal<PagedResult<PaymentDto>>({ items: [], totalCount: 0, page: 1, pageSize: 15, totalPages: 0 });
   totalSum = computed(() => this.paged().items.reduce((s, p) => s + p.amount, 0));
 
-  PaymentMethodLabels = PaymentMethodLabels;
   private subj = new Subject<string>();
 
   constructor() {
@@ -174,4 +174,7 @@ export class PaymentsComponent {
     });
   }
   iconFor(m: number) { return m === 1 ? 'payments' : m === 2 ? 'credit_card' : 'qr_code_2'; }
+  paymentMethodKey(m: number): string {
+    return m === 1 ? 'paymentMethod.cash' : m === 2 ? 'paymentMethod.visa' : 'paymentMethod.cliq';
+  }
 }

@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { TPipe } from '../../core/i18n/t.pipe';
+import { LangSwitchComponent } from '../../shared/components/lang-switch/lang-switch.component';
 import { NotificationsBellComponent } from '../notifications-bell/notifications-bell.component';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule, NotificationsBellComponent],
+  imports: [CommonModule, NotificationsBellComponent, LangSwitchComponent, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './topbar.component.html',
   styleUrls: ['./topbar.component.scss']

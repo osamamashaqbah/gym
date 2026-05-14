@@ -1,12 +1,13 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, signal } from '@angular/core';
 import { ApiService } from '../../core/services/api.service';
+import { TPipe } from '../../core/i18n/t.pipe';
 import { NotificationDto } from '../../core/models/models';
 
 @Component({
   selector: 'app-notifications-bell',
   standalone: true,
-  imports: [CommonModule, DatePipe],
+  imports: [CommonModule, DatePipe, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bell-wrap">
@@ -20,9 +21,9 @@ import { NotificationDto } from '../../core/models/models';
       @if (open()) {
         <div class="panel fade-in">
           <div class="panel-head">
-            <h3>Notifications</h3>
+            <h3>{{ 'notifications.title' | t }}</h3>
             @if (unreadCount() > 0) {
-              <button class="btn btn-ghost btn-sm" (click)="markAllRead()">Mark all read</button>
+              <button class="btn btn-ghost btn-sm" (click)="markAllRead()">{{ 'notifications.markAllRead' | t }}</button>
             }
           </div>
           <div class="panel-body">
@@ -31,7 +32,7 @@ import { NotificationDto } from '../../core/models/models';
             } @else if (items().length === 0) {
               <div class="empty">
                 <span class="material-icons-round">notifications_off</span>
-                <p>You're all caught up</p>
+                <p>{{ 'notifications.allCaughtUp' | t }}</p>
               </div>
             } @else {
               @for (n of items(); track n.id) {
@@ -56,7 +57,7 @@ import { NotificationDto } from '../../core/models/models';
     .bell-wrap { position: relative; }
     .dot {
       position: absolute;
-      top: -4px; right: -4px;
+      top: -4px; inset-inline-end: -4px;
       min-width: 18px; height: 18px;
       padding: 0 5px;
       background: var(--red);
@@ -70,7 +71,7 @@ import { NotificationDto } from '../../core/models/models';
     }
     .panel {
       position: absolute;
-      top: calc(100% + 12px); right: 0;
+      top: calc(100% + 12px); inset-inline-end: 0;
       width: 380px; max-width: 90vw;
       max-height: 70vh; overflow: hidden;
       display: flex; flex-direction: column;
@@ -104,7 +105,7 @@ import { NotificationDto } from '../../core/models/models';
       background: var(--blue);
       box-shadow: var(--blue-glow);
       align-self: center;
-      margin-right: -6px;
+      margin-inline-end: -6px;
     }
     .item-icon {
       width: 34px; height: 34px; border-radius: 9px;
