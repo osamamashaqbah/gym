@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Text;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GymManagement.Application.Common;
 using GymManagement.Application.DTOs.Payments;
 using GymManagement.Application.Interfaces;
@@ -36,12 +35,16 @@ public class PaymentService : IPaymentService
         }
 
         var total = await query.CountAsync(ct);
-        var items = await query
+        var payments = await query
+            .Include(p => p.Member)
+            .Include(p => p.Membership)!
+                .ThenInclude(m => m!.Plan)
             .OrderByDescending(p => p.PaidAt)
             .Skip((q.Page - 1) * q.PageSize)
             .Take(q.PageSize)
-            .ProjectTo<PaymentDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+
+        var items = payments.Select(p => _mapper.Map<PaymentDto>(p)).ToList();
 
         return new PagedResult<PaymentDto>
         {
@@ -51,11 +54,14 @@ public class PaymentService : IPaymentService
 
     public async Task<IReadOnlyList<PaymentDto>> GetByMemberAsync(Guid memberId, CancellationToken ct)
     {
-        return await _db.Payments
+        var payments = await _db.Payments
+            .Include(p => p.Member)
+            .Include(p => p.Membership)!
+                .ThenInclude(m => m!.Plan)
             .Where(p => p.MemberId == memberId)
             .OrderByDescending(p => p.PaidAt)
-            .ProjectTo<PaymentDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+        return payments.Select(p => _mapper.Map<PaymentDto>(p)).ToList();
     }
 
     public async Task<Result<PaymentDto>> CreateAsync(CreatePaymentRequest req, CancellationToken ct)
@@ -91,11 +97,12 @@ public class PaymentService : IPaymentService
         _db.Payments.Add(payment);
         await _db.SaveChangesAsync(ct);
 
-        var dto = await _db.Payments
-            .Where(p => p.Id == payment.Id)
-            .ProjectTo<PaymentDto>(_mapper.ConfigurationProvider)
-            .FirstAsync(ct);
-        return Result<PaymentDto>.Ok(dto);
+        var saved = await _db.Payments
+            .Include(p => p.Member)
+            .Include(p => p.Membership)!
+                .ThenInclude(m => m!.Plan)
+            .FirstAsync(p => p.Id == payment.Id, ct);
+        return Result<PaymentDto>.Ok(_mapper.Map<PaymentDto>(saved));
     }
 
     public async Task<InvoiceDto?> GetInvoiceAsync(Guid paymentId, CancellationToken ct)

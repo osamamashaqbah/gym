@@ -1,5 +1,4 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GymManagement.Application.Common;
 using GymManagement.Application.DTOs.Memberships;
 using GymManagement.Application.Interfaces;
@@ -22,10 +21,10 @@ public class MembershipService : IMembershipService
 
     public async Task<IReadOnlyList<MembershipPlanDto>> GetPlansAsync(CancellationToken ct)
     {
-        return await _db.MembershipPlans
+        var plans = await _db.MembershipPlans
             .OrderBy(p => p.DurationInMonths)
-            .ProjectTo<MembershipPlanDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+        return plans.Select(p => _mapper.Map<MembershipPlanDto>(p)).ToList();
     }
 
     public async Task<Result<MembershipPlanDto>> CreatePlanAsync(CreatePlanRequest req, CancellationToken ct)
@@ -77,11 +76,13 @@ public class MembershipService : IMembershipService
 
     public async Task<IReadOnlyList<MembershipDto>> GetByMemberAsync(Guid memberId, CancellationToken ct)
     {
-        return await _db.Memberships
+        var rows = await _db.Memberships
+            .Include(m => m.Member)
+            .Include(m => m.Plan)
             .Where(m => m.MemberId == memberId)
             .OrderByDescending(m => m.StartDate)
-            .ProjectTo<MembershipDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+        return rows.Select(m => _mapper.Map<MembershipDto>(m)).ToList();
     }
 
     public async Task<Result<MembershipDto>> CreateAsync(CreateMembershipRequest req, CancellationToken ct)
@@ -124,11 +125,8 @@ public class MembershipService : IMembershipService
 
         await _db.SaveChangesAsync(ct);
 
-        var dto = await _db.Memberships
-            .Where(m => m.Id == membership.Id)
-            .ProjectTo<MembershipDto>(_mapper.ConfigurationProvider)
-            .FirstAsync(ct);
-        return Result<MembershipDto>.Ok(dto);
+        var dto = await GetSingle(membership.Id, ct);
+        return Result<MembershipDto>.Ok(dto.Data!);
     }
 
     public Task<Result<MembershipDto>> RenewAsync(Guid memberId, RenewMembershipRequest req, CancellationToken ct)
@@ -195,11 +193,11 @@ public class MembershipService : IMembershipService
 
     private async Task<Result<MembershipDto>> GetSingle(Guid membershipId, CancellationToken ct)
     {
-        var dto = await _db.Memberships
-            .Where(x => x.Id == membershipId)
-            .ProjectTo<MembershipDto>(_mapper.ConfigurationProvider)
-            .FirstAsync(ct);
-        return Result<MembershipDto>.Ok(dto);
+        var entity = await _db.Memberships
+            .Include(m => m.Member)
+            .Include(m => m.Plan)
+            .FirstAsync(x => x.Id == membershipId, ct);
+        return Result<MembershipDto>.Ok(_mapper.Map<MembershipDto>(entity));
     }
 
     private static string GenerateInvoiceNumber()

@@ -1,5 +1,4 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GymManagement.Application.DTOs.Notifications;
 using GymManagement.Application.Interfaces;
 using GymManagement.Domain.Entities;
@@ -23,10 +22,10 @@ public class NotificationService : INotificationService
     {
         var q = _db.Notifications.AsQueryable();
         if (unreadOnly) q = q.Where(n => !n.IsRead);
-        return await q.OrderByDescending(n => n.CreatedAt)
+        var rows = await q.OrderByDescending(n => n.CreatedAt)
             .Take(100)
-            .ProjectTo<NotificationDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+        return rows.Select(n => _mapper.Map<NotificationDto>(n)).ToList();
     }
 
     public async Task MarkAsReadAsync(Guid id, CancellationToken ct)

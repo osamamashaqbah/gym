@@ -1,5 +1,4 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GymManagement.Application.DTOs.Dashboard;
 using GymManagement.Application.DTOs.Members;
 using GymManagement.Application.DTOs.Payments;
@@ -142,20 +141,31 @@ public class DashboardService : IDashboardService
 
     public async Task<IReadOnlyList<PaymentDto>> GetRecentPaymentsAsync(int take, CancellationToken ct)
     {
-        return await _db.Payments
+        // Materialise first (Include avoids ProjectTo subqueries that don't
+        // translate cleanly on every provider), then map in memory.
+        var payments = await _db.Payments
+            .Include(p => p.Member)
+            .Include(p => p.Membership)!
+                .ThenInclude(m => m!.Plan)
             .OrderByDescending(p => p.PaidAt)
             .Take(take)
-            .ProjectTo<PaymentDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+
+        return payments.Select(p => _mapper.Map<PaymentDto>(p)).ToList();
     }
 
     public async Task<IReadOnlyList<MemberDto>> GetRecentMembersAsync(int take, CancellationToken ct)
     {
-        return await _db.Members
+        // Same approach as above: load with includes, map in memory. The
+        // MemberDto mapping pulls "current plan / status / dates" from the
+        // member's most recent membership, which works fine in memory.
+        var members = await _db.Members
+            .Include(m => m.Memberships).ThenInclude(x => x.Plan)
             .Where(m => !m.IsArchived)
             .OrderByDescending(m => m.JoinedAt)
             .Take(take)
-            .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+
+        return members.Select(m => _mapper.Map<MemberDto>(m)).ToList();
     }
 }

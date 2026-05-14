@@ -1,5 +1,4 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GymManagement.Application.Common;
 using GymManagement.Application.DTOs.Members;
 using GymManagement.Application.Interfaces;
@@ -47,12 +46,14 @@ public class MemberService : IMemberService
 
         var total = await query.CountAsync(ct);
 
-        var items = await query
+        var members = await query
+            .Include(m => m.Memberships).ThenInclude(x => x.Plan)
             .OrderByDescending(m => m.JoinedAt)
             .Skip((q.Page - 1) * q.PageSize)
             .Take(q.PageSize)
-            .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+
+        var items = members.Select(m => _mapper.Map<MemberDto>(m)).ToList();
 
         return new PagedResult<MemberDto>
         {
@@ -65,10 +66,10 @@ public class MemberService : IMemberService
 
     public async Task<MemberDto?> GetByIdAsync(Guid id, CancellationToken ct)
     {
-        return await _db.Members
-            .Where(m => m.Id == id)
-            .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(ct);
+        var member = await _db.Members
+            .Include(m => m.Memberships).ThenInclude(x => x.Plan)
+            .FirstOrDefaultAsync(m => m.Id == id, ct);
+        return member is null ? null : _mapper.Map<MemberDto>(member);
     }
 
     public async Task<Result<MemberDto>> CreateAsync(CreateMemberRequest req, CancellationToken ct)

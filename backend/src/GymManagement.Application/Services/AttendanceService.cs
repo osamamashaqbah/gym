@@ -1,5 +1,4 @@
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GymManagement.Application.Common;
 using GymManagement.Application.DTOs.Attendance;
 using GymManagement.Application.Interfaces;
@@ -36,11 +35,10 @@ public class AttendanceService : IAttendanceService
         _db.Attendances.Add(att);
         await _db.SaveChangesAsync(ct);
 
-        var dto = await _db.Attendances
-            .Where(a => a.Id == att.Id)
-            .ProjectTo<AttendanceDto>(_mapper.ConfigurationProvider)
-            .FirstAsync(ct);
-        return Result<AttendanceDto>.Ok(dto);
+        var saved = await _db.Attendances
+            .Include(a => a.Member)
+            .FirstAsync(a => a.Id == att.Id, ct);
+        return Result<AttendanceDto>.Ok(_mapper.Map<AttendanceDto>(saved));
     }
 
     public async Task<PagedResult<AttendanceDto>> GetAllAsync(PaginationQuery q, DateTime? date, Guid? memberId, CancellationToken ct)
@@ -60,12 +58,14 @@ public class AttendanceService : IAttendanceService
         }
 
         var total = await query.CountAsync(ct);
-        var items = await query
+        var rows = await query
+            .Include(a => a.Member)
             .OrderByDescending(a => a.CheckInTime)
             .Skip((q.Page - 1) * q.PageSize)
             .Take(q.PageSize)
-            .ProjectTo<AttendanceDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+
+        var items = rows.Select(a => _mapper.Map<AttendanceDto>(a)).ToList();
 
         return new PagedResult<AttendanceDto>
         {
@@ -75,11 +75,12 @@ public class AttendanceService : IAttendanceService
 
     public async Task<IReadOnlyList<AttendanceDto>> GetByMemberAsync(Guid memberId, CancellationToken ct)
     {
-        return await _db.Attendances
+        var rows = await _db.Attendances
+            .Include(a => a.Member)
             .Where(a => a.MemberId == memberId)
             .OrderByDescending(a => a.CheckInTime)
             .Take(100)
-            .ProjectTo<AttendanceDto>(_mapper.ConfigurationProvider)
             .ToListAsync(ct);
+        return rows.Select(a => _mapper.Map<AttendanceDto>(a)).ToList();
     }
 }
