@@ -246,7 +246,16 @@ export class SettingsComponent {
     this.loadingGym.set(true);
     this.api.getSettings().subscribe(s => {
       this.gymSettings.set(s);
-      this.gymForm.patchValue(s as any);
+      this.gymForm.patchValue({
+        gymName: s.gymName,
+        address: s.address ?? '',
+        phoneNumber: s.phoneNumber ?? '',
+        email: s.email ?? '',
+        logoUrl: s.logoUrl ?? '',
+        currency: s.currency,
+        taxNumber: s.taxNumber ?? '',
+        website: s.website ?? ''
+      });
       this.loadingGym.set(false);
     });
   }

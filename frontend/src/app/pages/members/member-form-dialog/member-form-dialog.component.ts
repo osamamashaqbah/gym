@@ -113,7 +113,16 @@ export class MemberFormDialogComponent implements OnInit {
   ngOnInit() {
     this.api.getPlans().subscribe(p => this.plans.set(p.filter(x => x.isActive)));
     if (this.member) {
-      this.form.patchValue(this.member);
+      // Normalise nullable fields (null → '') for the non-nullable form.
+      this.form.patchValue({
+        fullName: this.member.fullName,
+        phoneNumber: this.member.phoneNumber,
+        gender: this.member.gender,
+        age: this.member.age,
+        email: this.member.email ?? '',
+        address: this.member.address ?? '',
+        notes: this.member.notes ?? ''
+      });
     }
   }
 

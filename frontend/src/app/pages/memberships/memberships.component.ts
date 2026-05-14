@@ -177,7 +177,14 @@ export class MembershipsComponent {
 
   edit(p: MembershipPlanDto) {
     this.editing.set(p);
-    this.form.patchValue(p);
+    // Normalise nullable fields so patchValue is happy with the non-nullable form.
+    this.form.patchValue({
+      name: p.name,
+      description: p.description ?? '',
+      duration: p.duration,
+      price: p.price,
+      isActive: p.isActive
+    });
     this.showDialog.set(true);
   }
 
