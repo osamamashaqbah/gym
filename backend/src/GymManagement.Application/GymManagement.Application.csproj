@@ -5,8 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--
+      AutoMapper 13.x bundles the IServiceCollection.AddAutoMapper extension
+      directly into the main package. Adding the legacy
+      AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 package
+      alongside it produces a duplicate AddAutoMapper definition and
+      breaks the build (CS0121 ambiguous call). It also forces AutoMapper
+      back to 12.0.1 (NU1608 + NU1903 vulnerability warnings).
+      Using AutoMapper 13.0.1 alone resolves all three issues.
+    -->
     <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
