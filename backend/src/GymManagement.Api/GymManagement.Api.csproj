@@ -14,6 +14,14 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <DebugType>embedded</DebugType>
     <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!--
+      NOTE: The Web SDK already auto-includes wwwroot/** as Content (see
+      Microsoft.NET.Sdk.DefaultItems.Shared.targets). We must NOT add an
+      explicit <Content Include="wwwroot\**\*"> entry, otherwise we hit
+      NETSDK1022 (duplicate Content items) the moment the Angular build
+      drops files into wwwroot.
+    -->
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,13 +34,5 @@
     <ProjectReference Include="..\GymManagement.Domain\GymManagement.Domain.csproj" />
     <ProjectReference Include="..\GymManagement.Application\GymManagement.Application.csproj" />
     <ProjectReference Include="..\GymManagement.Infrastructure\GymManagement.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <!-- Make wwwroot/* travel with the build output and the publish output. -->
-  <ItemGroup>
-    <Content Include="wwwroot\**\*" Condition="Exists('wwwroot')">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 </Project>
