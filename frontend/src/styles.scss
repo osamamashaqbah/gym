@@ -338,14 +338,24 @@ textarea.input { resize: vertical; min-height: 80px; }
   position: fixed; inset: 0;
   background: rgba(5,5,7,.7);
   backdrop-filter: blur(8px);
+  /*
+    Center the dialog vertically + horizontally, but allow the BACKDROP
+    itself to scroll when the dialog content is taller than the viewport.
+    Using flex centering on the backdrop while padding is set on the
+    backdrop prevents the dialog from getting clipped at the top —
+    align-items: center alone would push tall dialogs off-screen
+    upward with no way to scroll back.
+  */
   display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
   z-index: 9000;
   animation: fadeUp 200ms var(--ease) both;
 }
 .dialog {
   width: min(560px, 92vw);
-  max-height: 90vh;
-  overflow: auto;
+  margin: auto;             /* keeps the dialog centered when it fits, scrolls when it doesn't */
+  max-height: none;          /* let the backdrop handle overflow instead */
   background: var(--surface);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
