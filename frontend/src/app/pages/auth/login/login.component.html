@@ -1,0 +1,67 @@
+<div class="auth-shell">
+  <div class="auth-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="grid"></div>
+  </div>
+
+  <div class="auth-card fade-in">
+    <div class="brand">
+      <div class="brand-mark">
+        <span class="material-icons-round">fitness_center</span>
+      </div>
+      <div>
+        <div class="brand-name">IRON FORGE</div>
+        <div class="brand-tag">PREMIUM GYM MANAGEMENT</div>
+      </div>
+    </div>
+
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-subtitle">Sign in to access your gym command center</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="col gap-4" style="margin-top: 28px;">
+      <div class="form-field">
+        <label for="username">Username or Email</label>
+        <div class="input-icon">
+          <span class="material-icons-round">person</span>
+          <input id="username" class="input" formControlName="username" autocomplete="username" placeholder="owner" />
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+        <div class="input-icon">
+          <span class="material-icons-round">lock</span>
+          <input id="password" class="input" [type]="showPassword() ? 'text' : 'password'"
+                 formControlName="password" autocomplete="current-password" placeholder="••••••••" />
+          <button type="button" class="toggle" (click)="showPassword.set(!showPassword())">
+            <span class="material-icons-round">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="row between" style="margin-top: -4px;">
+        <a routerLink="/forgot-password" class="forgot">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-btn" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span>
+        } @else {
+          <span>Sign In</span>
+          <span class="material-icons-round">arrow_forward</span>
+        }
+      </button>
+    </form>
+
+    <div class="hint">
+      <div class="hint-title">Demo accounts</div>
+      <div class="hint-grid">
+        <div><strong>owner</strong> / Owner&#64;123</div>
+        <div><strong>admin</strong> / Admin&#64;123</div>
+        <div><strong>reception</strong> / Reception&#64;123</div>
+        <div><strong>coach</strong> / Coach&#64;123</div>
+      </div>
+    </div>
+  </div>
+</div>

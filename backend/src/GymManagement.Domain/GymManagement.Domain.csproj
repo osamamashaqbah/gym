@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>GymManagement.Domain</RootNamespace>
+    <AssemblyName>GymManagement.Domain</AssemblyName>
+  </PropertyGroup>
+</Project>
