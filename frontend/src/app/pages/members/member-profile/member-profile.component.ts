@@ -117,6 +117,15 @@ export class MemberProfileComponent {
   }
 
   printInvoice(p: PaymentDto) {
-    window.open(this.api.invoiceHtmlUrl(p.id), '_blank');
+    this.api.invoiceHtml(p.id).subscribe((html) => {
+      const win = window.open('', '_blank');
+      if (win) {
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        // Trigger print after content paints.
+        setTimeout(() => win.print(), 300);
+      }
+    });
   }
 }

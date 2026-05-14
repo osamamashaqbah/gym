@@ -4,8 +4,8 @@
   "description": "Premium Gym Management System — Angular standalone client",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0 --port 4200",
-    "build": "ng build",
+    "start": "ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.conf.json",
+    "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development"
   },
   "private": true,

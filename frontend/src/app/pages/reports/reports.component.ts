@@ -47,30 +47,30 @@ import { forkJoin } from 'rxjs';
         </form>
 
         <div class="exports">
-          <a class="export-row" [href]="api.reportMembersUrl()" target="_blank" download>
+          <button class="export-row" (click)="downloadMembers()">
             <span class="material-icons-round">groups</span>
             <div class="grow">
               <div class="export-name">Members report</div>
               <div class="export-desc">All active members with current plan and status</div>
             </div>
             <span class="badge">CSV</span>
-          </a>
-          <a class="export-row" [href]="paymentsUrl()" target="_blank" download>
+          </button>
+          <button class="export-row" (click)="downloadPayments()">
             <span class="material-icons-round">payments</span>
             <div class="grow">
               <div class="export-name">Payments report</div>
               <div class="export-desc">Payments in selected date range</div>
             </div>
             <span class="badge">CSV</span>
-          </a>
-          <a class="export-row" [href]="attendanceUrl()" target="_blank" download>
+          </button>
+          <button class="export-row" (click)="downloadAttendance()">
             <span class="material-icons-round">event_available</span>
             <div class="grow">
               <div class="export-name">Attendance report</div>
               <div class="export-desc">Check-ins in selected date range</div>
             </div>
             <span class="badge">CSV</span>
-          </a>
+          </button>
         </div>
       </div>
 
@@ -99,6 +99,9 @@ import { forkJoin } from 'rxjs';
       background: var(--bg-glass);
       border: 1px solid var(--border);
       color: var(--text-1);
+      width: 100%;
+      cursor: pointer;
+      text-align: left;
       transition: all var(--duration) var(--ease);
     }
     .export-row:hover { background: var(--bg-glass-2); border-color: var(--border-strong); transform: translateX(2px); }
@@ -142,15 +145,43 @@ export class ReportsComponent {
 
   paymentsUrl() {
     const v = this.filterForm.getRawValue();
-    return this.api.reportPaymentsUrl(
+    return this.api.reportPayments(
       v.from ? new Date(v.from).toISOString() : undefined,
       v.to ? new Date(v.to).toISOString() : undefined);
   }
   attendanceUrl() {
     const v = this.filterForm.getRawValue();
-    return this.api.reportAttendanceUrl(
+    return this.api.reportAttendance(
       v.from ? new Date(v.from).toISOString() : undefined,
       v.to ? new Date(v.to).toISOString() : undefined);
+  }
+
+  downloadMembers() {
+    this.api.reportMembers().subscribe(b => this.saveBlob(b, 'members.csv'));
+  }
+  downloadPayments() {
+    const v = this.filterForm.getRawValue();
+    this.api.reportPayments(
+      v.from ? new Date(v.from).toISOString() : undefined,
+      v.to ? new Date(v.to).toISOString() : undefined
+    ).subscribe(b => this.saveBlob(b, 'payments.csv'));
+  }
+  downloadAttendance() {
+    const v = this.filterForm.getRawValue();
+    this.api.reportAttendance(
+      v.from ? new Date(v.from).toISOString() : undefined,
+      v.to ? new Date(v.to).toISOString() : undefined
+    ).subscribe(b => this.saveBlob(b, 'attendance.csv'));
+  }
+
+  private saveBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   print() { window.print(); }

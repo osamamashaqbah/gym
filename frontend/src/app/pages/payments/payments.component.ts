@@ -162,6 +162,16 @@ export class PaymentsComponent {
   onTo(e: Event)     { this.to.set((e.target as HTMLInputElement).value);   this.page.set(1); this.load(); }
   reset() { this.search.set(''); this.from.set(''); this.to.set(''); this.page.set(1); this.load(); }
   setPage(p: number) { this.page.set(p); this.load(); }
-  invoice(p: PaymentDto) { window.open(this.api.invoiceHtmlUrl(p.id), '_blank'); }
+  invoice(p: PaymentDto) {
+    this.api.invoiceHtml(p.id).subscribe((html) => {
+      const win = window.open('', '_blank');
+      if (win) {
+        win.document.open();
+        win.document.write(html);
+        win.document.close();
+        setTimeout(() => win.print(), 300);
+      }
+    });
+  }
   iconFor(m: number) { return m === 1 ? 'payments' : m === 2 ? 'credit_card' : 'qr_code_2'; }
 }

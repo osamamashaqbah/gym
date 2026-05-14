@@ -15,11 +15,22 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
     {
+        var provider = (config["Database:Provider"] ?? "Sqlite").Trim();
         var connectionString = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
 
         services.AddDbContext<ApplicationDbContext>(opt =>
-            opt.UseNpgsql(connectionString, npg => npg.MigrationsAssembly("GymManagement.Infrastructure")));
+        {
+            if (provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase))
+            {
+                opt.UseNpgsql(connectionString);
+            }
+            else
+            {
+                // Default: SQLite — perfect for single-file EXE deployments.
+                opt.UseSqlite(connectionString);
+            }
+        });
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.AddHttpContextAccessor();

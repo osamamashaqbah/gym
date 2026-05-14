@@ -6,6 +6,21 @@ A complete, production-grade gym management platform built for premium gyms and 
 
 ---
 
+## 🚀 One-click EXE deployment
+
+Want to ship this as a standalone Windows app — **no .NET, no Node, no Postgres needed on the target machine**?
+
+```cmd
+build-exe.bat            ← on Windows
+./build-exe.sh           ← on macOS / Linux  (still produces a Windows EXE)
+```
+
+You get `dist/IronForge.GymManagement.exe` (~95 MB) that bundles the API, the Angular UI, and a SQLite database in a single file. Double-click and it opens your browser ready to use.
+
+📖 **Full guide (Arabic + English):** see [`EXE-BUILD.md`](./EXE-BUILD.md).
+
+---
+
 ## Highlights
 
 - **Premium dark UI** — matte black, metallic silver gradients, glassmorphism, soft glows, smooth animations

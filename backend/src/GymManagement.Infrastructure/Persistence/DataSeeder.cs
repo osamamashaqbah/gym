@@ -12,7 +12,9 @@ public static class DataSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext db, IPasswordHasher hasher, CancellationToken ct = default)
     {
-        await db.Database.MigrateAsync(ct);
+        // EnsureCreated creates the database from the model on first run.
+        // Works for both SQLite (single-file EXE) and Postgres without migrations.
+        await db.Database.EnsureCreatedAsync(ct);
 
         // Roles
         if (!await db.Roles.AnyAsync(ct))

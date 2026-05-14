@@ -63,7 +63,9 @@ export class ApiService {
   paymentsByMember(memberId: string) { return this.http.get<PaymentDto[]>(`${this.base}/payments/by-member/${memberId}`); }
   createPayment(body: CreatePaymentRequest) { return this.http.post<PaymentDto>(`${this.base}/payments`, body); }
   invoice(id: string) { return this.http.get<any>(`${this.base}/payments/${id}/invoice`); }
-  invoiceHtmlUrl(id: string) { return `${this.base}/payments/${id}/invoice/html`; }
+  invoiceHtml(id: string) {
+    return this.http.get(`${this.base}/payments/${id}/invoice/html`, { responseType: 'text' });
+  }
 
   // ---------- Attendance
   getAttendance(opts: { page?: number; pageSize?: number; search?: string; date?: string; memberId?: string } = {}) {
@@ -99,13 +101,19 @@ export class ApiService {
   deleteStaff(id: string) { return this.http.delete(`${this.base}/settings/staff/${id}`); }
 
   // ---------- Reports
-  reportMembersUrl() { return `${this.base}/reports/members.csv`; }
-  reportPaymentsUrl(from?: string, to?: string) {
-    const q = [from ? `from=${from}` : '', to ? `to=${to}` : ''].filter(Boolean).join('&');
-    return `${this.base}/reports/payments.csv${q ? '?' + q : ''}`;
+  reportMembers() {
+    return this.http.get(`${this.base}/reports/members.csv`, { responseType: 'blob' });
   }
-  reportAttendanceUrl(from?: string, to?: string) {
-    const q = [from ? `from=${from}` : '', to ? `to=${to}` : ''].filter(Boolean).join('&');
-    return `${this.base}/reports/attendance.csv${q ? '?' + q : ''}`;
+  reportPayments(from?: string, to?: string) {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http.get(`${this.base}/reports/payments.csv`, { params, responseType: 'blob' });
+  }
+  reportAttendance(from?: string, to?: string) {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http.get(`${this.base}/reports/attendance.csv`, { params, responseType: 'blob' });
   }
 }

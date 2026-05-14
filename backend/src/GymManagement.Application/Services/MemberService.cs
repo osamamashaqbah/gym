@@ -37,8 +37,12 @@ public class MemberService : IMemberService
 
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<MembershipStatus>(status, true, out var st))
         {
-            query = query.Where(m =>
-                m.Memberships.OrderByDescending(x => x.ExpiryDate).First().Status == st);
+            // Members whose latest membership matches the requested status.
+            // Implemented as an Any() with a subquery to keep both Postgres and SQLite happy.
+            query = query.Where(m => m.Memberships
+                .OrderByDescending(x => x.ExpiryDate)
+                .Take(1)
+                .Any(x => x.Status == st));
         }
 
         var total = await query.CountAsync(ct);

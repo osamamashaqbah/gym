@@ -52,7 +52,7 @@ public class PlanConfig : IEntityTypeConfiguration<MembershipPlan>
         b.ToTable("membership_plans");
         b.HasKey(x => x.Id);
         b.Property(x => x.Name).HasMaxLength(100).IsRequired();
-        b.Property(x => x.Price).HasColumnType("numeric(12,2)");
+        b.Property(x => x.Price).HasColumnType("decimal(18,2)");
     }
 }
 
@@ -62,8 +62,8 @@ public class MembershipConfig : IEntityTypeConfiguration<Membership>
     {
         b.ToTable("memberships");
         b.HasKey(x => x.Id);
-        b.Property(x => x.TotalPrice).HasColumnType("numeric(12,2)");
-        b.Property(x => x.AmountPaid).HasColumnType("numeric(12,2)");
+        b.Property(x => x.TotalPrice).HasColumnType("decimal(18,2)");
+        b.Property(x => x.AmountPaid).HasColumnType("decimal(18,2)");
         b.HasOne(x => x.Member).WithMany(m => m.Memberships).HasForeignKey(x => x.MemberId).OnDelete(DeleteBehavior.Cascade);
         b.HasOne(x => x.Plan).WithMany(p => p.Memberships).HasForeignKey(x => x.PlanId).OnDelete(DeleteBehavior.Restrict);
         b.HasIndex(x => x.ExpiryDate);
@@ -77,7 +77,7 @@ public class PaymentConfig : IEntityTypeConfiguration<Payment>
     {
         b.ToTable("payments");
         b.HasKey(x => x.Id);
-        b.Property(x => x.Amount).HasColumnType("numeric(12,2)");
+        b.Property(x => x.Amount).HasColumnType("decimal(18,2)");
         b.Property(x => x.InvoiceNumber).HasMaxLength(50).IsRequired();
         b.HasIndex(x => x.InvoiceNumber).IsUnique();
         b.HasIndex(x => x.PaidAt);
