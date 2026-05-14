@@ -6,7 +6,14 @@ using Microsoft.EntityFrameworkCore;
 namespace GymManagement.Infrastructure.Persistence;
 
 /// <summary>
-/// Seeds initial data: roles, default admin, plans, sample members, memberships, payments, attendance.
+/// Seeds the absolute minimum needed for the system to work on first run:
+///   - The four roles (Owner, Admin, Reception, Coach)
+///   - A single owner account so the user can sign in
+///   - A default GymSettings row
+///   - The four standard membership plans (which the owner can edit/delete)
+///
+/// No demo members, payments, attendance, or extra staff users are created;
+/// the gym starts with a clean dataset.
 /// </summary>
 public static class DataSeeder
 {
@@ -16,7 +23,7 @@ public static class DataSeeder
         // Works for both SQLite (single-file EXE) and Postgres without migrations.
         await db.Database.EnsureCreatedAsync(ct);
 
-        // Roles
+        // Roles (always required for role-based authorization to work).
         if (!await db.Roles.AnyAsync(ct))
         {
             db.Roles.AddRange(
@@ -27,156 +34,43 @@ public static class DataSeeder
             await db.SaveChangesAsync(ct);
         }
 
-        // Settings
+        // Default gym settings row.
         if (!await db.GymSettings.AnyAsync(ct))
         {
             db.GymSettings.Add(new GymSettings
             {
-                GymName = "Iron Forge Premium Gym",
-                Address = "123 Performance Blvd, Amman, Jordan",
-                PhoneNumber = "+962 6 123 4567",
-                Email = "info@ironforge.gym",
-                Currency = "JOD",
-                Website = "https://ironforge.gym"
+                GymName = "My Gym",
+                Currency = "JOD"
             });
             await db.SaveChangesAsync(ct);
         }
 
-        // Initial admin
+        // The single owner account, so the user has somewhere to sign in.
+        // Everything else (admins, reception, coaches) is added later from the UI.
         if (!await db.Users.AnyAsync(ct))
         {
             var ownerRole = await db.Roles.FirstAsync(r => r.Name == "Owner", ct);
-            var adminRole = await db.Roles.FirstAsync(r => r.Name == "Admin", ct);
-            var reception = await db.Roles.FirstAsync(r => r.Name == "Reception", ct);
-            var coach = await db.Roles.FirstAsync(r => r.Name == "Coach", ct);
 
-            db.Users.AddRange(
-                new User
-                {
-                    FullName = "System Owner",
-                    Email = "owner@ironforge.gym",
-                    Username = "owner",
-                    PasswordHash = hasher.Hash("Owner@123"),
-                    RoleId = ownerRole.Id,
-                    PhoneNumber = "+962 79 000 0001",
-                    IsActive = true
-                },
-                new User
-                {
-                    FullName = "Admin User",
-                    Email = "admin@ironforge.gym",
-                    Username = "admin",
-                    PasswordHash = hasher.Hash("Admin@123"),
-                    RoleId = adminRole.Id,
-                    PhoneNumber = "+962 79 000 0002",
-                    IsActive = true
-                },
-                new User
-                {
-                    FullName = "Reception Staff",
-                    Email = "reception@ironforge.gym",
-                    Username = "reception",
-                    PasswordHash = hasher.Hash("Reception@123"),
-                    RoleId = reception.Id,
-                    PhoneNumber = "+962 79 000 0003",
-                    IsActive = true
-                },
-                new User
-                {
-                    FullName = "Head Coach",
-                    Email = "coach@ironforge.gym",
-                    Username = "coach",
-                    PasswordHash = hasher.Hash("Coach@123"),
-                    RoleId = coach.Id,
-                    PhoneNumber = "+962 79 000 0004",
-                    IsActive = true
-                });
+            db.Users.Add(new User
+            {
+                FullName = "Owner",
+                Email = "owner@gym.local",
+                Username = "owner",
+                PasswordHash = hasher.Hash("Owner@123"),
+                RoleId = ownerRole.Id,
+                IsActive = true
+            });
             await db.SaveChangesAsync(ct);
         }
 
-        // Plans
+        // Standard plans the owner can rename, re-price, deactivate, or delete.
         if (!await db.MembershipPlans.AnyAsync(ct))
         {
             db.MembershipPlans.AddRange(
-                new MembershipPlan { Name = "Monthly", Description = "1-month full access", Duration = PlanDuration.Monthly, DurationInMonths = 1, Price = 30m },
-                new MembershipPlan { Name = "Quarterly", Description = "3-month full access", Duration = PlanDuration.ThreeMonths, DurationInMonths = 3, Price = 80m },
-                new MembershipPlan { Name = "Semi-Annual", Description = "6-month full access", Duration = PlanDuration.SixMonths, DurationInMonths = 6, Price = 150m },
-                new MembershipPlan { Name = "Annual", Description = "12-month full access", Duration = PlanDuration.Yearly, DurationInMonths = 12, Price = 280m });
-            await db.SaveChangesAsync(ct);
-        }
-
-        // Demo members & memberships
-        if (!await db.Members.AnyAsync(ct))
-        {
-            var plans = await db.MembershipPlans.OrderBy(p => p.DurationInMonths).ToListAsync(ct);
-            var rng = new Random(42);
-            var firstNames = new[] { "Omar", "Lina", "Ahmad", "Sara", "Khalid", "Mona", "Yousef", "Layla", "Bashar", "Reem", "Tariq", "Hala" };
-            var lastNames = new[] { "Al-Hassan", "Khoury", "Saleh", "Nasser", "Hadid", "Mansour", "Odeh", "Daoud", "Karam", "Sabbagh" };
-
-            var members = new List<Member>();
-            for (int i = 0; i < 24; i++)
-            {
-                var fn = firstNames[rng.Next(firstNames.Length)];
-                var ln = lastNames[rng.Next(lastNames.Length)];
-                members.Add(new Member
-                {
-                    FullName = $"{fn} {ln}",
-                    PhoneNumber = $"+962 79 {rng.Next(100, 999)} {rng.Next(1000, 9999)}",
-                    Gender = rng.Next(2) == 0 ? Gender.Male : Gender.Female,
-                    Age = rng.Next(18, 55),
-                    Address = "Amman, Jordan",
-                    Email = $"{fn.ToLower()}.{ln.ToLower().Replace("-", "").Replace(" ", "")}{i}@example.com",
-                    JoinedAt = DateTime.UtcNow.AddDays(-rng.Next(5, 200))
-                });
-            }
-            db.Members.AddRange(members);
-            await db.SaveChangesAsync(ct);
-
-            foreach (var m in members)
-            {
-                var plan = plans[rng.Next(plans.Count)];
-                var start = DateTime.UtcNow.AddDays(-rng.Next(0, 180));
-                var expiry = start.AddMonths(plan.DurationInMonths);
-
-                MembershipStatus status;
-                if (expiry < DateTime.UtcNow) status = MembershipStatus.Expired;
-                else if (rng.Next(10) == 0) status = MembershipStatus.Frozen;
-                else status = MembershipStatus.Active;
-
-                var paid = rng.Next(2) == 0 ? plan.Price : plan.Price * (decimal)(0.5 + rng.NextDouble() * 0.5);
-                var membership = new Membership
-                {
-                    MemberId = m.Id,
-                    PlanId = plan.Id,
-                    StartDate = start,
-                    ExpiryDate = expiry,
-                    TotalPrice = plan.Price,
-                    AmountPaid = paid,
-                    Status = status
-                };
-                db.Memberships.Add(membership);
-
-                db.Payments.Add(new Payment
-                {
-                    MemberId = m.Id,
-                    MembershipId = membership.Id,
-                    Amount = paid,
-                    Method = (PaymentMethod)rng.Next(1, 4),
-                    PaidAt = start,
-                    InvoiceNumber = $"INV-{start:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}"
-                });
-
-                // Attendance
-                var attCount = rng.Next(3, 18);
-                for (int i = 0; i < attCount; i++)
-                {
-                    db.Attendances.Add(new Attendance
-                    {
-                        MemberId = m.Id,
-                        CheckInTime = DateTime.UtcNow.AddDays(-rng.Next(0, 30)).AddHours(-rng.Next(0, 8))
-                    });
-                }
-            }
+                new MembershipPlan { Name = "Monthly",     Description = "1-month full access",  Duration = PlanDuration.Monthly,     DurationInMonths = 1,  Price = 30m },
+                new MembershipPlan { Name = "Quarterly",   Description = "3-month full access",  Duration = PlanDuration.ThreeMonths, DurationInMonths = 3,  Price = 80m },
+                new MembershipPlan { Name = "Semi-Annual", Description = "6-month full access",  Duration = PlanDuration.SixMonths,   DurationInMonths = 6,  Price = 150m },
+                new MembershipPlan { Name = "Annual",      Description = "12-month full access", Duration = PlanDuration.Yearly,      DurationInMonths = 12, Price = 280m });
             await db.SaveChangesAsync(ct);
         }
     }

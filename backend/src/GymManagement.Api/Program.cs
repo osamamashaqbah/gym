@@ -150,14 +150,6 @@ static void PrintBanner(string url)
     Console.WriteLine($"   App:     {url}");
     Console.WriteLine($"   Swagger: {url}/swagger");
     Console.WriteLine();
-    Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine("   Demo accounts:");
-    Console.ResetColor();
-    Console.WriteLine("     owner     / Owner@123");
-    Console.WriteLine("     admin     / Admin@123");
-    Console.WriteLine("     reception / Reception@123");
-    Console.WriteLine("     coach     / Coach@123");
-    Console.WriteLine();
     Console.ForegroundColor = ConsoleColor.DarkGray;
     Console.WriteLine("   Press Ctrl+C to stop the server.");
     Console.ResetColor();

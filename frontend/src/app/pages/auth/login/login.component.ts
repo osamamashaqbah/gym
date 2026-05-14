@@ -23,8 +23,8 @@ export class LoginComponent {
   showPassword = signal(false);
 
   form = this.fb.nonNullable.group({
-    username: ['owner', [Validators.required, Validators.minLength(3)]],
-    password: ['Owner@123', [Validators.required, Validators.minLength(4)]]
+    username: ['', [Validators.required, Validators.minLength(3)]],
+    password: ['', [Validators.required, Validators.minLength(4)]]
   });
 
   submit(): void {
