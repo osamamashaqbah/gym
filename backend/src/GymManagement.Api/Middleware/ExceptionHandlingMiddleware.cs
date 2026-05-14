@@ -36,13 +36,25 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
+            // Print the full exception (with stack trace) to the API console
+            // window. When the user is running the single-file EXE this is the
+            // black console behind the browser — we want it loud and obvious
+            // so problems can be diagnosed without attaching a debugger.
+            _logger.LogError(ex, "Unhandled exception on {Method} {Path}", context.Request.Method, context.Request.Path);
+
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "application/json";
+
+            // Surface the actual exception type + message back to the client.
+            // For a single-tenant gym management system running locally this
+            // is far more useful than a generic "Server error" toast.
+            var rootCause = ex;
+            while (rootCause.InnerException != null) rootCause = rootCause.InnerException;
+
             await context.Response.WriteAsync(JsonSerializer.Serialize(new
             {
                 success = false,
-                error = "An unexpected error occurred."
+                error = $"{rootCause.GetType().Name}: {rootCause.Message}"
             }));
         }
     }
