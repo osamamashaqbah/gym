@@ -1,0 +1,177 @@
+<div class="page fade-in">
+  @if (loading()) {
+    <div class="card" style="display:flex;align-items:center;justify-content:center;padding:80px;gap:14px;">
+      <span class="spinner"></span>
+      <span>Loading member profile...</span>
+    </div>
+  } @else if (member(); as m) {
+    <a routerLink="/members" class="back-link">
+      <span class="material-icons-round">arrow_back</span> Back to members
+    </a>
+
+    <div class="hero card">
+      <div class="hero-left">
+        <div class="hero-avatar">{{ m.fullName.charAt(0) }}</div>
+        <div>
+          <h1 class="hero-name">{{ m.fullName }}</h1>
+          <div class="hero-meta">
+            <span><span class="material-icons-round">phone</span> {{ m.phoneNumber }}</span>
+            @if (m.email) { <span><span class="material-icons-round">email</span> {{ m.email }}</span> }
+            <span><span class="material-icons-round">cake</span> {{ m.age }} y/o · {{ GenderLabels[m.gender] }}</span>
+          </div>
+          @if (activeMembership(); as a) {
+            <div class="hero-status">
+              <span class="badge"
+                [class.badge-active]="a.status === 1"
+                [class.badge-expired]="a.status === 2"
+                [class.badge-frozen]="a.status === 3"
+                [class.badge-cancelled]="a.status === 4">
+                {{ StatusLabels[a.status] }}
+              </span>
+              <span style="color: var(--text-4); font-size: 13px;">
+                {{ a.planName }} · expires {{ a.expiryDate | date:'mediumDate' }}
+              </span>
+            </div>
+          } @else {
+            <div class="hero-status">
+              <span class="badge badge-cancelled">No Active Plan</span>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="hero-right">
+        @if (canEdit()) {
+          <button class="btn btn-success" (click)="checkIn()" [disabled]="!activeMembership() || activeMembership()!.status !== 1">
+            <span class="material-icons-round">check_circle</span> Check In
+          </button>
+          <button class="btn btn-primary" (click)="showMembership.set(true)">
+            <span class="material-icons-round">card_membership</span> New / Renew
+          </button>
+          <button class="btn btn-ghost" (click)="showPayment.set(true)">
+            <span class="material-icons-round">payments</span> Add Payment
+          </button>
+          <button class="btn btn-ghost btn-icon" (click)="showEdit.set(true)" title="Edit">
+            <span class="material-icons-round">edit</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="qstat"><div class="qlabel">Attendance</div><div class="qvalue">{{ attendanceCount() }}</div></div>
+      <div class="qstat"><div class="qlabel">Total Paid</div><div class="qvalue">{{ totalPaid() | number:'1.2-2' }} JOD</div></div>
+      <div class="qstat"><div class="qlabel">Memberships</div><div class="qvalue">{{ memberships().length }}</div></div>
+      <div class="qstat"><div class="qlabel">Joined</div><div class="qvalue small">{{ m.joinedAt | date:'mediumDate' }}</div></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="row between" style="margin-bottom: 14px;">
+          <h3>Membership History</h3>
+        </div>
+        @if (memberships().length === 0) {
+          <div class="empty-state">
+            <span class="material-icons-round">card_membership</span>
+            <p>No memberships yet. Create one to get started.</p>
+          </div>
+        } @else {
+          @for (mb of memberships(); track mb.id) {
+            <div class="ms-row">
+              <div class="grow">
+                <div class="row gap-2">
+                  <strong>{{ mb.planName }}</strong>
+                  <span class="badge"
+                    [class.badge-active]="mb.status === 1"
+                    [class.badge-expired]="mb.status === 2"
+                    [class.badge-frozen]="mb.status === 3"
+                    [class.badge-cancelled]="mb.status === 4">
+                    {{ StatusLabels[mb.status] }}
+                  </span>
+                </div>
+                <div class="ms-meta">
+                  {{ mb.startDate | date:'mediumDate' }} → {{ mb.expiryDate | date:'mediumDate' }} ·
+                  Paid {{ mb.amountPaid | number:'1.2-2' }} / {{ mb.totalPrice | number:'1.2-2' }} JOD
+                  @if (mb.remainingBalance > 0) {
+                    <span style="color: var(--orange);"> · {{ mb.remainingBalance | number:'1.2-2' }} JOD due</span>
+                  }
+                </div>
+              </div>
+              @if (canEdit() && mb.status === 1) {
+                <button class="btn btn-ghost btn-sm" (click)="freeze(mb)">Freeze</button>
+              }
+              @if (canEdit() && mb.status === 3) {
+                <button class="btn btn-ghost btn-sm" (click)="unfreeze(mb)">Unfreeze</button>
+              }
+              @if (canEdit() && (mb.status === 1 || mb.status === 3)) {
+                <button class="btn btn-ghost btn-sm" (click)="cancel(mb)">Cancel</button>
+              }
+            </div>
+          }
+        }
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom: 14px;">Payment History</h3>
+        @if (payments().length === 0) {
+          <div class="empty-state"><span class="material-icons-round">receipt_long</span><p>No payments recorded</p></div>
+        } @else {
+          @for (p of payments(); track p.id) {
+            <div class="ms-row">
+              <div class="grow">
+                <strong>{{ p.amount | number:'1.2-2' }} JOD</strong>
+                <div class="ms-meta">
+                  {{ PaymentMethodLabels[p.method] }} · {{ p.paidAt | date:'medium' }} ·
+                  <span class="mono">{{ p.invoiceNumber }}</span>
+                </div>
+              </div>
+              <button class="btn btn-ghost btn-sm" (click)="printInvoice(p)" title="Open invoice">
+                <span class="material-icons-round">print</span>
+              </button>
+            </div>
+          }
+        }
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom: 14px;">Attendance Log</h3>
+        @if (attendance().length === 0) {
+          <div class="empty-state"><span class="material-icons-round">event_available</span><p>No check-ins yet</p></div>
+        } @else {
+          <div class="att-grid">
+            @for (a of attendance(); track a.id) {
+              <div class="att">
+                <span class="material-icons-round">login</span>
+                <div>
+                  <div>{{ a.checkInTime | date:'mediumDate' }}</div>
+                  <div class="ms-meta">{{ a.checkInTime | date:'shortTime' }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      @if (m.notes || m.address) {
+        <div class="card">
+          <h3 style="margin-bottom: 14px;">Notes & Address</h3>
+          @if (m.address) {
+            <div class="ms-meta" style="margin-bottom: 8px;"><strong>Address: </strong>{{ m.address }}</div>
+          }
+          @if (m.notes) {
+            <p style="color: var(--text-3); white-space: pre-wrap;">{{ m.notes }}</p>
+          }
+        </div>
+      }
+    </div>
+
+    @if (showEdit()) {
+      <app-member-form-dialog [member]="member()" (close)="showEdit.set(false)" (saved)="onEdited()" />
+    }
+    @if (showMembership() && member()) {
+      <app-membership-dialog [memberId]="member()!.id" (close)="showMembership.set(false)" (saved)="onMembershipCreated()" />
+    }
+    @if (showPayment() && member()) {
+      <app-payment-dialog [memberId]="member()!.id" [memberships]="memberships()" (close)="showPayment.set(false)" (saved)="onPaymentCreated()" />
+    }
+  }
+</div>
