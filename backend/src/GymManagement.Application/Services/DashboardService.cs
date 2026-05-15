@@ -38,15 +38,15 @@ public class DashboardService : IDashboardService
             .CountAsync(m => m.Status == MembershipStatus.Active && m.ExpiryDate >= now && m.ExpiryDate <= soon, ct);
         var attendanceToday = await _db.Attendances
             .CountAsync(a => a.CheckInTime >= todayStart && a.CheckInTime < todayEnd, ct);
-        var revenueToday = await _db.Payments
+        var revenueToday = (decimal)(await _db.Payments
             .Where(p => p.PaidAt >= todayStart && p.PaidAt < todayEnd)
-            .SumAsync(p => (decimal?)p.Amount, ct) ?? 0m;
-        var revenueThisMonth = await _db.Payments
+            .SumAsync(p => (double?)p.Amount, ct) ?? 0d);
+        var revenueThisMonth = (decimal)(await _db.Payments
             .Where(p => p.PaidAt >= monthStart)
-            .SumAsync(p => (decimal?)p.Amount, ct) ?? 0m;
-        var revenueThisYear = await _db.Payments
+            .SumAsync(p => (double?)p.Amount, ct) ?? 0d);
+        var revenueThisYear = (decimal)(await _db.Payments
             .Where(p => p.PaidAt >= yearStart)
-            .SumAsync(p => (decimal?)p.Amount, ct) ?? 0m;
+            .SumAsync(p => (double?)p.Amount, ct) ?? 0d);
         var newMembersThisMonth = await _db.Members
             .CountAsync(m => m.JoinedAt >= monthStart, ct);
 
@@ -64,7 +64,7 @@ public class DashboardService : IDashboardService
         var revenueRows = await _db.Payments
             .Where(p => p.PaidAt >= start)
             .GroupBy(p => new { p.PaidAt.Year, p.PaidAt.Month })
-            .Select(g => new { g.Key.Year, g.Key.Month, Revenue = g.Sum(x => x.Amount) })
+            .Select(g => new { g.Key.Year, g.Key.Month, Revenue = (decimal)g.Sum(x => (double)x.Amount) })
             .ToListAsync(ct);
 
         var revenueLast12 = new List<RevenuePointDto>();
