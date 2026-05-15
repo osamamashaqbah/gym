@@ -37,15 +37,19 @@ public class DashboardService : IDashboardService
             .CountAsync(m => m.Status == MembershipStatus.Active && m.ExpiryDate >= now && m.ExpiryDate <= soon, ct);
         var attendanceToday = await _db.Attendances
             .CountAsync(a => a.CheckInTime >= todayStart && a.CheckInTime < todayEnd, ct);
-        var revenueToday = await _db.Payments
+        // SQLite cannot SUM a decimal column directly (NotSupportedException
+        // from the EF Core SQLite provider). We materialise the values as
+        // double for aggregation and convert back to decimal in memory. The
+        // numbers we're working with (gym revenue) easily fit in double.
+        var revenueToday = (decimal)await _db.Payments
             .Where(p => p.PaidAt >= todayStart && p.PaidAt < todayEnd)
-            .SumAsync(p => (decimal?)p.Amount, ct) ?? 0m;
-        var revenueThisMonth = await _db.Payments
+            .SumAsync(p => (double?)p.Amount, ct) ?? 0m;
+        var revenueThisMonth = (decimal)await _db.Payments
             .Where(p => p.PaidAt >= monthStart)
-            .SumAsync(p => (decimal?)p.Amount, ct) ?? 0m;
-        var revenueThisYear = await _db.Payments
+            .SumAsync(p => (double?)p.Amount, ct) ?? 0m;
+        var revenueThisYear = (decimal)await _db.Payments
             .Where(p => p.PaidAt >= yearStart)
-            .SumAsync(p => (decimal?)p.Amount, ct) ?? 0m;
+            .SumAsync(p => (double?)p.Amount, ct) ?? 0m;
         var newMembersThisMonth = await _db.Members
             .CountAsync(m => m.JoinedAt >= monthStart, ct);
 
