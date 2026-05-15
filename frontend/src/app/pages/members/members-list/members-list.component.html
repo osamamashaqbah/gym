@@ -1,0 +1,151 @@
+<div class="page fade-in">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">{{ 'members.title' | t }}</h1>
+      <p class="page-subtitle">{{ 'members.subtitle' | t }}</p>
+    </div>
+    @if (canEdit()) {
+      <button class="btn btn-primary" (click)="openCreate()">
+        <span class="material-icons-round">person_add</span> {{ 'members.addMember' | t }}
+      </button>
+    }
+  </div>
+
+  <div class="card filters-card">
+    <div class="filters">
+      <div class="search-field">
+        <span class="material-icons-round">search</span>
+        <input class="input" [placeholder]="'members.searchPlaceholder' | t"
+               [value]="search()" (input)="onSearch($event)" />
+      </div>
+      <select class="input status-filter" [value]="statusFilter()" (change)="onStatusChange($event)">
+        <option value="">{{ 'members.allStatuses' | t }}</option>
+        <option value="Active">{{ 'status.active' | t }}</option>
+        <option value="Expired">{{ 'status.expired' | t }}</option>
+        <option value="Frozen">{{ 'status.frozen' | t }}</option>
+        <option value="Cancelled">{{ 'status.cancelled' | t }}</option>
+      </select>
+      <button class="btn btn-ghost" (click)="reset()" *ngIf="search() || statusFilter()">
+        <span class="material-icons-round">close</span> {{ 'common.clear' | t }}
+      </button>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    @if (loading()) {
+      <div class="loading-state">
+        <span class="spinner"></span>
+        <span>{{ 'members.loadingMembers' | t }}</span>
+      </div>
+    } @else if (paged().items.length === 0) {
+      <div class="empty-state">
+        <span class="material-icons-round">groups</span>
+        <h3>{{ 'members.noMembersFound' | t }}</h3>
+        <p>{{ search() || statusFilter() ? ('members.tryAdjusting' | t) : ('members.getStartedAdd' | t) }}</p>
+      </div>
+    } @else {
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>{{ 'members.member' | t }}</th>
+              <th>{{ 'members.phone' | t }}</th>
+              <th>{{ 'members.plan' | t }}</th>
+              <th>{{ 'memberForm.gender' | t }}</th>
+              <th>{{ 'members.expiry' | t }}</th>
+              <th>{{ 'members.joinedCol' | t }}</th>
+              <th class="actions-col">{{ 'common.actions' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of paged().items; track m.id) {
+              <tr (click)="goTo(m)">
+                <td>
+                  <div class="name-cell">
+                    <div class="avatar">{{ m.fullName.charAt(0) }}</div>
+                    <div>
+                      <div class="member-name">{{ m.fullName }}</div>
+                      <div class="member-meta">{{ m.email || '—' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="mono">{{ m.phoneNumber }}</span></td>
+                <td>{{ m.currentPlanName || '—' }}</td>
+                <td>
+                  @if (m.currentStatus) {
+                    <span class="badge"
+                      [class.badge-active]="m.currentStatus === 1"
+                      [class.badge-expired]="m.currentStatus === 2"
+                      [class.badge-frozen]="m.currentStatus === 3"
+                      [class.badge-cancelled]="m.currentStatus === 4">
+                      {{ statusKey(m.currentStatus) | t }}
+                    </span>
+                  } @else {
+                    <span class="badge badge-cancelled">{{ 'status.noPlan' | t }}</span>
+                  }
+                </td>
+                <td>{{ m.membershipExpiryDate ? (m.membershipExpiryDate | date:'mediumDate') : '—' }}</td>
+                <td>{{ m.joinedAt | date:'mediumDate' }}</td>
+                <td class="actions-col" (click)="$event.stopPropagation()">
+                  <button class="btn btn-ghost btn-icon" (click)="goTo(m)" [title]="'members.viewProfile' | t">
+                    <span class="material-icons-round">visibility</span>
+                  </button>
+                  @if (canEdit()) {
+                    <button class="btn btn-ghost btn-icon" (click)="openEdit(m)" [title]="'common.edit' | t">
+                      <span class="material-icons-round">edit</span>
+                    </button>
+                  }
+                  @if (canDelete()) {
+                    <button class="btn btn-ghost btn-icon" (click)="confirmArchive(m)" [title]="'members.archive' | t">
+                      <span class="material-icons-round">archive</span>
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <div class="page-info">
+          {{ 'members.showing' | t }} {{ (paged().page - 1) * paged().pageSize + 1 }}–{{ pageEndIndex() }}
+          {{ 'common.of' | t }} <strong>{{ paged().totalCount }}</strong> {{ 'members.members' | t }}
+        </div>
+        <div class="page-controls">
+          <button class="btn btn-ghost btn-sm" [disabled]="page() === 1" (click)="setPage(1)">
+            <span class="material-icons-round">first_page</span>
+          </button>
+          <button class="btn btn-ghost btn-sm" [disabled]="page() === 1" (click)="setPage(page() - 1)">
+            <span class="material-icons-round">chevron_left</span>
+          </button>
+          <span class="page-indicator">{{ page() }} / {{ paged().totalPages || 1 }}</span>
+          <button class="btn btn-ghost btn-sm" [disabled]="page() >= (paged().totalPages || 1)" (click)="setPage(page() + 1)">
+            <span class="material-icons-round">chevron_right</span>
+          </button>
+          <button class="btn btn-ghost btn-sm" [disabled]="page() >= (paged().totalPages || 1)" (click)="setPage(paged().totalPages)">
+            <span class="material-icons-round">last_page</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (showForm()) {
+    <app-member-form-dialog
+      [member]="editing()"
+      (close)="closeForm()"
+      (saved)="onSaved()" />
+  }
+
+  @if (toArchive()) {
+    <app-confirm-dialog
+      [title]="'members.archiveConfirmTitle' | t"
+      [message]="archiveMessage()"
+      [confirmLabel]="'members.archiveButton' | t"
+      [cancelLabel]="'common.cancel' | t"
+      [danger]="true"
+      (cancel)="toArchive.set(null)"
+      (confirm)="doArchive()" />
+  }
+</div>

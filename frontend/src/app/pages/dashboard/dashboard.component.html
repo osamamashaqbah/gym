@@ -1,0 +1,126 @@
+<div class="page fade-in">
+  <div class="welcome">
+    <div class="welcome-text">
+      <h1>{{ greetingKey() | t }}, {{ user()?.fullName }}</h1>
+      <p>{{ 'dashboard.subtitle' | t }}</p>
+    </div>
+    <button class="btn btn-ghost" (click)="refresh()">
+      <span class="material-icons-round">refresh</span> {{ 'common.refresh' | t }}
+    </button>
+  </div>
+
+  <div class="stats-grid">
+    <app-stat-card [label]="'dashboard.activeMembers' | t"     [value]="stats()?.activeMembers ?? 0"
+                   icon="trending_up"  tone="green"  [loading]="loading()" />
+    <app-stat-card [label]="'dashboard.expired' | t"            [value]="stats()?.expiredMemberships ?? 0"
+                   icon="event_busy"   tone="red"    [loading]="loading()" />
+    <app-stat-card [label]="'dashboard.expiringSoon' | t"       [value]="stats()?.expiringSoonMemberships ?? 0"
+                   icon="warning_amber" tone="orange" [loading]="loading()" />
+    <app-stat-card [label]="'dashboard.attendanceToday' | t"    [value]="stats()?.attendanceToday ?? 0"
+                   icon="event_available" tone="blue" [loading]="loading()" />
+    <app-stat-card [label]="'dashboard.revenueToday' | t"       [value]="stats()?.revenueToday ?? 0"
+                   icon="payments" tone="silver" suffix=" JOD" [loading]="loading()" />
+    <app-stat-card [label]="'dashboard.revenueThisMonth' | t"   [value]="stats()?.revenueThisMonth ?? 0"
+                   icon="leaderboard"   tone="silver" suffix=" JOD" [loading]="loading()" />
+    <app-stat-card [label]="'dashboard.newMembersThisMonth' | t" [value]="stats()?.newMembersThisMonth ?? 0"
+                   icon="person_add"    tone="silver" [loading]="loading()" />
+    <app-stat-card [label]="'dashboard.totalMembers' | t"       [value]="stats()?.totalMembers ?? 0"
+                   icon="groups"        tone="silver" [loading]="loading()" />
+  </div>
+
+  <div class="charts-grid">
+    <app-chart-card
+      [title]="'dashboard.revenueLast12' | t"
+      [subtitle]="'dashboard.revenueLast12Sub' | t"
+      type="line"
+      [label]="'dashboard.revenueLabel' | t"
+      color="#2ea0ff"
+      [labels]="revenueLabels()"
+      [data]="revenueData()"
+      [height]="280" />
+
+    <app-chart-card
+      [title]="'dashboard.distribution' | t"
+      [subtitle]="'dashboard.distributionSub' | t"
+      type="doughnut"
+      [labels]="distributionLabels()"
+      [data]="distributionData()"
+      [height]="280" />
+  </div>
+
+  <div class="charts-grid">
+    <app-chart-card
+      [title]="'dashboard.attendanceLast7' | t"
+      [subtitle]="'dashboard.attendanceLast7Sub' | t"
+      type="bar"
+      [label]="'dashboard.checkInsLabel' | t"
+      color="#1fd182"
+      [labels]="attendanceLabels()"
+      [data]="attendanceData()"
+      [height]="240" />
+
+    <app-chart-card
+      [title]="'dashboard.popularPlans' | t"
+      [subtitle]="'dashboard.popularPlansSub' | t"
+      type="bar"
+      [label]="'dashboard.membersLabel' | t"
+      color="#ffa630"
+      [labels]="planLabels()"
+      [data]="planData()"
+      [height]="240" />
+  </div>
+
+  <div class="bottom-grid">
+    <div class="card list-card">
+      <div class="list-head">
+        <h3>{{ 'dashboard.recentMembers' | t }}</h3>
+        <a routerLink="/members" class="link">{{ 'dashboard.viewAll' | t }} <span class="material-icons-round">arrow_forward</span></a>
+      </div>
+      @if (recentMembers().length === 0 && !loading()) {
+        <div class="empty">{{ 'dashboard.noMembersYet' | t }}</div>
+      }
+      @for (m of recentMembers(); track m.id) {
+        <div class="list-row">
+          <div class="avatar">{{ m.fullName.charAt(0) }}</div>
+          <div class="grow">
+            <div class="name">{{ m.fullName }}</div>
+            <div class="meta">{{ m.phoneNumber }} · {{ 'dashboard.joined' | t }} {{ m.joinedAt | date:'mediumDate' }}</div>
+          </div>
+          <span class="badge"
+                [class.badge-active]="m.currentStatus === 1"
+                [class.badge-expired]="m.currentStatus === 2"
+                [class.badge-frozen]="m.currentStatus === 3"
+                [class.badge-cancelled]="m.currentStatus === 4">
+            @switch (m.currentStatus) {
+              @case (1) { {{ 'status.active' | t }} }
+              @case (2) { {{ 'status.expired' | t }} }
+              @case (3) { {{ 'status.frozen' | t }} }
+              @case (4) { {{ 'status.cancelled' | t }} }
+              @default  { {{ 'status.new' | t }} }
+            }
+          </span>
+        </div>
+      }
+    </div>
+
+    <div class="card list-card">
+      <div class="list-head">
+        <h3>{{ 'dashboard.recentPayments' | t }}</h3>
+        <a routerLink="/payments" class="link">{{ 'dashboard.viewAll' | t }} <span class="material-icons-round">arrow_forward</span></a>
+      </div>
+      @if (recentPayments().length === 0 && !loading()) {
+        <div class="empty">{{ 'dashboard.noPaymentsYet' | t }}</div>
+      }
+      @for (p of recentPayments(); track p.id) {
+        <div class="list-row">
+          <div class="avatar">{{ p.memberName.charAt(0) }}</div>
+          <div class="grow">
+            <div class="name">{{ p.memberName }}</div>
+            <div class="meta">{{ paymentMethodKey(p.method) | t }} · {{ p.paidAt | date:'medium' }}</div>
+          </div>
+          <div class="amount">+{{ p.amount | number:'1.2-2' }} JOD</div>
+        </div>
+      }
+    </div>
+  </div>
+</div>

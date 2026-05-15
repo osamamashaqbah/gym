@@ -1,0 +1,34 @@
+<header class="topbar">
+  <div class="left">
+    <button class="btn btn-ghost btn-icon mobile-only" (click)="toggleMobile.emit()" [attr.aria-label]="'topbar.openMenu' | t">
+      <span class="material-icons-round">menu</span>
+    </button>
+    <button class="btn btn-ghost btn-icon desktop-only" (click)="toggle.emit()" [attr.aria-label]="'topbar.collapseSidebar' | t">
+      <span class="material-icons-round">{{ collapsed ? 'menu_open' : 'menu' }}</span>
+    </button>
+
+    <div class="search-wrap">
+      <span class="material-icons-round search-icon">search</span>
+      <input class="input search" type="search" [placeholder]="'topbar.searchPlaceholder' | t" />
+      <kbd class="kbd">⌘K</kbd>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="now">
+      <div class="now-time">{{ now | date: 'HH:mm' }}</div>
+      <div class="now-date">{{ now | date: 'EEE, MMM d' }}</div>
+    </div>
+
+    <app-lang-switch></app-lang-switch>
+    <app-notifications-bell></app-notifications-bell>
+
+    <button class="user" (click)="goToProfile()" *ngIf="user() as u">
+      <div class="user-avatar">{{ u.fullName.charAt(0) }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ u.fullName }}</div>
+        <div class="user-role">{{ u.role }}</div>
+      </div>
+    </button>
+  </div>
+</header>

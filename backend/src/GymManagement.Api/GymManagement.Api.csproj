@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <RootNamespace>GymManagement.Api</RootNamespace>
+    <AssemblyName>IronForge.GymManagement</AssemblyName>
+    <AssemblyTitle>Iron Forge — Premium Gym Management</AssemblyTitle>
+    <Product>Iron Forge Gym Management</Product>
+    <Company>Iron Forge</Company>
+    <Version>1.0.0</Version>
+
+    <!-- Single-file self-contained publish settings (override at command line) -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+    <InvariantGlobalization>false</InvariantGlobalization>
+
+    <!--
+      NOTE: The Web SDK already auto-includes wwwroot/** as Content (see
+      Microsoft.NET.Sdk.DefaultItems.Shared.targets). We must NOT add an
+      explicit <Content Include="wwwroot\**\*"> entry, otherwise we hit
+      NETSDK1022 (duplicate Content items) the moment the Angular build
+      drops files into wwwroot.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GymManagement.Domain\GymManagement.Domain.csproj" />
+    <ProjectReference Include="..\GymManagement.Application\GymManagement.Application.csproj" />
+    <ProjectReference Include="..\GymManagement.Infrastructure\GymManagement.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

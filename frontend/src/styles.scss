@@ -1,0 +1,425 @@
+/* ============================================================
+   Iron Forge — Premium Gym Management UI
+   Luxury dark theme: matte black, metallic silver, glassmorphism
+   ============================================================ */
+
+:root {
+  /* Base */
+  --bg-deep:        #050507;
+  --bg-base:        #0a0a0c;
+  --bg-elevated:    #111114;
+  --bg-glass:       rgba(255, 255, 255, 0.04);
+  --bg-glass-2:     rgba(255, 255, 255, 0.06);
+  --surface:        #14141a;
+  --surface-2:      #1a1a22;
+  --surface-3:      #22222c;
+  --border:         rgba(255, 255, 255, 0.08);
+  --border-strong:  rgba(255, 255, 255, 0.16);
+
+  /* Metallic silver */
+  --silver-1:       #f5f6f8;
+  --silver-2:       #d8dadf;
+  --silver-3:       #a9adb6;
+  --silver-4:       #8a8e98;
+  --silver-grad:    linear-gradient(135deg, #f4f5f7 0%, #c7c9cf 25%, #8e9099 55%, #c7c9cf 80%, #f4f5f7 100%);
+  --silver-grad-soft: linear-gradient(135deg, rgba(245,246,248,0.18) 0%, rgba(199,201,207,0.06) 50%, rgba(142,144,153,0.18) 100%);
+
+  /* Text */
+  --text-1:         #ffffff;
+  --text-2:         #e6e7ec;
+  --text-3:         #b6b8c0;
+  --text-4:         #7e828c;
+  --text-muted:     #555861;
+
+  /* Accents */
+  --blue:           #2ea0ff;
+  --blue-soft:      rgba(46, 160, 255, 0.14);
+  --blue-glow:      0 0 24px rgba(46, 160, 255, 0.45);
+
+  --green:          #1fd182;
+  --green-soft:     rgba(31, 209, 130, 0.14);
+  --green-glow:     0 0 24px rgba(31, 209, 130, 0.4);
+
+  --red:            #ff4757;
+  --red-soft:       rgba(255, 71, 87, 0.14);
+  --red-glow:       0 0 24px rgba(255, 71, 87, 0.4);
+
+  --orange:         #ffa630;
+  --orange-soft:    rgba(255, 166, 48, 0.14);
+  --orange-glow:    0 0 24px rgba(255, 166, 48, 0.4);
+
+  /* Effects */
+  --shadow-1:       0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
+  --shadow-2:       0 8px 32px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.5);
+  --shadow-glow:    0 0 0 1px rgba(255,255,255,.05) inset, 0 8px 30px rgba(0,0,0,.5);
+
+  --radius-sm:      8px;
+  --radius:         14px;
+  --radius-lg:      20px;
+  --radius-xl:      28px;
+
+  --space-1:        4px;
+  --space-2:        8px;
+  --space-3:        12px;
+  --space-4:        16px;
+  --space-5:        20px;
+  --space-6:        24px;
+  --space-8:        32px;
+  --space-10:       40px;
+
+  --duration:       240ms;
+  --ease:           cubic-bezier(.22,.61,.36,1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--bg-deep);
+  color: var(--text-2);
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.005em;
+  font-feature-settings: 'cv11','ss01','ss02';
+}
+
+/* Arabic uses Cairo (or Tajawal as a fallback) — both are bundled
+   from Google Fonts via the <link> tag in index.html and chosen
+   reactively when <html dir="rtl"> is applied by I18nService. */
+html[dir="rtl"], html[dir="rtl"] body {
+  font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, 'Segoe UI', Tahoma, Arial, sans-serif;
+  letter-spacing: 0;
+}
+html[dir="rtl"] h1,
+html[dir="rtl"] h2,
+html[dir="rtl"] h3,
+html[dir="rtl"] h4,
+html[dir="rtl"] h5 {
+  font-family: 'Cairo', 'Tajawal', system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 90% -10%, rgba(46, 160, 255, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(255, 166, 48, 0.06), transparent 60%),
+    var(--bg-deep);
+  background-attachment: fixed;
+}
+
+h1,h2,h3,h4,h5 { font-family: 'Space Grotesk', 'Inter', sans-serif; color: var(--text-1); margin: 0; letter-spacing: -.01em; font-weight: 600; }
+h1 { font-size: 28px; } h2 { font-size: 22px; } h3 { font-size: 18px; } h4 { font-size: 16px; }
+p  { margin: 0; }
+a  { color: var(--silver-2); text-decoration: none; transition: color var(--duration) var(--ease); }
+a:hover { color: var(--text-1); }
+.material-icons-round { font-family: 'Material Icons Round'; font-size: 20px; line-height: 1; vertical-align: middle; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #2a2a33, #1a1a22); border-radius: 8px; border: 2px solid var(--bg-deep); }
+::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #3a3a44, #2a2a33); }
+
+/* Layout primitives */
+.flex { display: flex; }
+.row { display: flex; align-items: center; gap: var(--space-3); }
+.col { display: flex; flex-direction: column; gap: var(--space-3); }
+.between { justify-content: space-between; }
+.grow { flex: 1; }
+.gap-2 { gap: var(--space-2); } .gap-3 { gap: var(--space-3); } .gap-4 { gap: var(--space-4); } .gap-6 { gap: var(--space-6); }
+
+/* Glass card */
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-6);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: var(--shadow-glow);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), transparent 30%);
+  pointer-events: none;
+}
+.card-title { font-size: 13px; color: var(--text-4); text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+.card-value { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; color: var(--text-1); letter-spacing: -.02em; }
+
+/* Metallic silver button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: .02em;
+  border: 1px solid var(--border-strong);
+  background: var(--silver-grad-soft);
+  color: var(--text-1);
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+.btn:hover { transform: translateY(-1px); border-color: var(--silver-3); box-shadow: 0 6px 24px rgba(0,0,0,.5); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.btn-primary {
+  background: var(--silver-grad);
+  color: #0a0a0c;
+  border: 1px solid #d8dadf;
+  text-shadow: 0 1px 0 rgba(255,255,255,.4);
+}
+.btn-primary:hover { box-shadow: 0 0 24px rgba(216, 218, 223, .35); }
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-2);
+}
+.btn-ghost:hover { background: var(--bg-glass); border-color: var(--border-strong); }
+
+.btn-danger { background: linear-gradient(135deg, #ff4757, #c1303f); border-color: #ff4757; color: #fff; }
+.btn-danger:hover { box-shadow: var(--red-glow); }
+
+.btn-success { background: linear-gradient(135deg, #1fd182, #149c61); border-color: #1fd182; color: #062b1a; }
+.btn-success:hover { box-shadow: var(--green-glow); }
+
+.btn-sm { padding: 6px 12px; font-size: 12.5px; }
+.btn-icon { padding: 8px; width: 36px; height: 36px; justify-content: center; }
+
+/* Forms */
+.form-field {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.form-field label {
+  color: var(--text-3);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.input, .select, textarea.input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  font-size: 14px;
+  font-family: inherit;
+  transition: all var(--duration) var(--ease);
+  outline: none;
+}
+.input::placeholder { color: var(--text-muted); }
+.input:focus, .select:focus, textarea.input:focus {
+  border-color: var(--silver-3);
+  box-shadow: 0 0 0 3px rgba(216, 218, 223, .12);
+  background: var(--surface-3);
+}
+textarea.input { resize: vertical; min-height: 80px; }
+
+.field-error { color: var(--red); font-size: 12px; }
+
+/* Badges / chips */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: var(--bg-glass);
+  color: var(--text-3);
+}
+.badge::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+.badge-active { color: var(--green); background: var(--green-soft); border-color: rgba(31,209,130,.3); }
+.badge-expired { color: var(--red); background: var(--red-soft); border-color: rgba(255,71,87,.3); }
+.badge-frozen { color: var(--blue); background: var(--blue-soft); border-color: rgba(46,160,255,.3); }
+.badge-cancelled { color: var(--text-4); background: var(--bg-glass-2); }
+.badge-warning { color: var(--orange); background: var(--orange-soft); border-color: rgba(255,166,48,.3); }
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+}
+.table thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text-4);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  position: sticky; top: 0; z-index: 1;
+}
+html[dir="rtl"] .table thead th { text-align: right; letter-spacing: 0; }
+.table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  vertical-align: middle;
+}
+.table tbody tr { transition: background var(--duration) var(--ease); }
+.table tbody tr:hover { background: var(--bg-glass); }
+.table .name-cell { display: flex; align-items: center; gap: 12px; }
+.table .avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--silver-grad);
+  display: flex; align-items: center; justify-content: center;
+  color: #0a0a0c; font-weight: 700; font-size: 13px;
+  border: 1px solid var(--border-strong);
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeUp 360ms var(--ease) both; }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(216,218,223,.5); }
+  50%      { box-shadow: 0 0 0 8px rgba(216,218,223,0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 22px; height: 22px;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--silver-1);
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+  display: inline-block;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--text-4);
+}
+.empty-state .material-icons-round { font-size: 48px; opacity: .35; display: block; margin: 0 auto 12px; }
+
+/* Toast */
+.toast-host {
+  position: fixed; right: 24px; bottom: 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  min-width: 280px; max-width: 380px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-2);
+  color: var(--text-1);
+  font-size: 13.5px;
+  display: flex; align-items: center; gap: 12px;
+  animation: fadeUp 240ms var(--ease) both;
+  backdrop-filter: blur(14px);
+}
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error   { border-left: 3px solid var(--red); }
+.toast.warning { border-left: 3px solid var(--orange); }
+.toast.info    { border-left: 3px solid var(--blue); }
+
+/* Dialog */
+.dialog-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(5,5,7,.7);
+  backdrop-filter: blur(8px);
+  /*
+    Center the dialog vertically + horizontally, but allow the BACKDROP
+    itself to scroll when the dialog content is taller than the viewport.
+    Using flex centering on the backdrop while padding is set on the
+    backdrop prevents the dialog from getting clipped at the top —
+    align-items: center alone would push tall dialogs off-screen
+    upward with no way to scroll back.
+  */
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  z-index: 9000;
+  animation: fadeUp 200ms var(--ease) both;
+}
+.dialog {
+  width: min(560px, 92vw);
+  margin: auto;             /* keeps the dialog centered when it fits, scrolls when it doesn't */
+  max-height: none;          /* let the backdrop handle overflow instead */
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  padding: 28px;
+}
+.dialog h2 { margin-bottom: 4px; }
+.dialog .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+
+/* Page */
+.page { padding: 28px 32px; }
+.page-header {
+  display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;
+  margin-bottom: 24px;
+}
+.page-title { font-size: 26px; }
+.page-subtitle { color: var(--text-4); font-size: 13.5px; margin-top: 4px; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .page { padding: 18px 16px; }
+  .card { padding: 18px; }
+}
+
+/* ============================================================
+   RTL adjustments — applied automatically when I18nService sets
+   <html dir="rtl">. We tone down letter-spacing/uppercase rules
+   that hurt Arabic legibility and fix a few directional alignments
+   the rest of the styles assume.
+   ============================================================ */
+html[dir="rtl"] .form-field label,
+html[dir="rtl"] .card-title,
+html[dir="rtl"] .badge,
+html[dir="rtl"] .qlabel,
+html[dir="rtl"] .stat-label,
+html[dir="rtl"] .now-date,
+html[dir="rtl"] .user-role,
+html[dir="rtl"] .profile-role,
+html[dir="rtl"] .brand-tag,
+html[dir="rtl"] .brand-name {
+  text-transform: none;
+  letter-spacing: 0;
+}
+html[dir="rtl"] .toast-host { right: auto; left: 24px; }
+html[dir="rtl"] .login-btn .material-icons-round { transform: scaleX(-1); }
+html[dir="rtl"] .back-link .material-icons-round,
+html[dir="rtl"] .list-head .link .material-icons-round { transform: scaleX(-1); }
+html[dir="rtl"] .toggle { right: auto; left: 6px; }
+html[dir="rtl"] .input-icon .input { padding-left: 14px; padding-right: 42px; }
+html[dir="rtl"] .input-icon > .material-icons-round { left: auto; right: 14px; }

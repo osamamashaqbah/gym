@@ -1,0 +1,61 @@
+<div class="shell" [class.collapsed]="collapsed()" [class.mobile-open]="mobileOpen()">
+  @if (mobileOpen()) {
+    <div class="mobile-backdrop" (click)="closeMobile()"></div>
+  }
+
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <div class="brand">
+        <div class="brand-mark">
+          <span class="material-icons-round">fitness_center</span>
+        </div>
+        @if (!collapsed()) {
+          <div class="brand-text">
+            <div class="brand-name">IRON FORGE</div>
+            <div class="brand-tag">PREMIUM</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <nav class="nav">
+      @for (item of navItems(); track item.path) {
+        <a [routerLink]="item.path" routerLinkActive="active"
+           class="nav-item" (click)="closeMobile()" [title]="item.labelKey | t">
+          <span class="nav-icon material-icons-round">{{ item.icon }}</span>
+          @if (!collapsed()) { <span class="nav-label">{{ item.labelKey | t }}</span> }
+          <span class="nav-active-indicator"></span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-foot">
+      @if (user(); as u) {
+        <div class="profile">
+          <div class="avatar">{{ u.fullName.charAt(0) }}</div>
+          @if (!collapsed()) {
+            <div class="profile-text">
+              <div class="profile-name">{{ u.fullName }}</div>
+              <div class="profile-role">{{ u.role }}</div>
+            </div>
+          }
+        </div>
+      }
+      <button class="btn btn-ghost btn-sm logout" (click)="logout()" [title]="'nav.logout' | t">
+        <span class="material-icons-round">logout</span>
+        @if (!collapsed()) { <span>{{ 'nav.logout' | t }}</span> }
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <app-topbar
+      [collapsed]="collapsed()"
+      (toggle)="toggleSidebar()"
+      (toggleMobile)="toggleMobile()" />
+
+    <div class="page-host">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

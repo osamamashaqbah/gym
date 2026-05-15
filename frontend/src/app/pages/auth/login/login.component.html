@@ -1,0 +1,62 @@
+<div class="auth-shell">
+  <div class="auth-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="grid"></div>
+  </div>
+
+  <button type="button" class="lang-corner" (click)="i18n.toggle()">
+    <span class="material-icons-round">language</span>
+    <span>{{ i18n.lang() === 'en' ? 'العربية' : 'English' }}</span>
+  </button>
+
+  <div class="auth-card fade-in">
+    <div class="brand">
+      <div class="brand-mark">
+        <span class="material-icons-round">fitness_center</span>
+      </div>
+      <div>
+        <div class="brand-name">IRON FORGE</div>
+        <div class="brand-tag">PREMIUM GYM MANAGEMENT</div>
+      </div>
+    </div>
+
+    <h1 class="auth-title">{{ 'auth.welcomeBack' | t }}</h1>
+    <p class="auth-subtitle">{{ 'auth.signInSubtitle' | t }}</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="col gap-4" style="margin-top: 28px;">
+      <div class="form-field">
+        <label for="username">{{ 'auth.usernameOrEmail' | t }}</label>
+        <div class="input-icon">
+          <span class="material-icons-round">person</span>
+          <input id="username" class="input" formControlName="username" autocomplete="username" [placeholder]="'auth.enterUsername' | t" />
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="password">{{ 'auth.password' | t }}</label>
+        <div class="input-icon">
+          <span class="material-icons-round">lock</span>
+          <input id="password" class="input" [type]="showPassword() ? 'text' : 'password'"
+                 formControlName="password" autocomplete="current-password" placeholder="••••••••" />
+          <button type="button" class="toggle" (click)="showPassword.set(!showPassword())">
+            <span class="material-icons-round">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="row between" style="margin-top: -4px;">
+        <a routerLink="/forgot-password" class="forgot">{{ 'auth.forgotPassword' | t }}</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-btn" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <span class="spinner" style="border-top-color:#0a0a0c;border-color:#0a0a0c40"></span>
+        } @else {
+          <span>{{ 'auth.signIn' | t }}</span>
+          <span class="material-icons-round">arrow_forward</span>
+        }
+      </button>
+    </form>
+  </div>
+</div>
