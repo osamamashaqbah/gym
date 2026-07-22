@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
@@ -89,7 +89,10 @@ function startStaticServer() {
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
     fs.createReadStream(filePath).pipe(res);
   });
-  return new Promise((resolve) => staticServer.listen(FRONTEND_PORT, '127.0.0.1', resolve));
+  return new Promise((resolve, reject) => {
+    staticServer.once('error', reject);
+    staticServer.listen(FRONTEND_PORT, '127.0.0.1', resolve);
+  });
 }
 
 async function createWindow() {
@@ -108,28 +111,55 @@ async function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
-app.whenReady().then(async () => {
-  Menu.setApplicationMenu(null);
-  startBackend();
-  await startStaticServer();
-  try {
-    await waitForBackend();
-  } catch (e) {
-    console.error(e);
-  }
-  await createWindow();
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
+    }
   });
-});
 
-app.on('window-all-closed', () => {
-  if (backendProcess) backendProcess.kill();
-  if (staticServer) staticServer.close();
-  if (process.platform !== 'darwin') app.quit();
-});
+  app.whenReady().then(async () => {
+    Menu.setApplicationMenu(null);
+    startBackend();
+    try {
+      await startStaticServer();
+    } catch (e) {
+      dialog.showErrorBox(
+        'Iron Forge Gym Management',
+        `Port ${FRONTEND_PORT} is already in use by another program.\n\n` +
+        `Close any other copy of this app (check Task Manager for "Iron Forge Gym Management.exe" ` +
+        `and "GymManagement.Api.exe") and try again.`
+      );
+      app.quit();
+      return;
+    }
+    try {
+      await waitForBackend();
+    } catch (e) {
+      console.error(e);
+      dialog.showErrorBox(
+        'Iron Forge Gym Management',
+        'The backend server did not start in time. Please try again.'
+      );
+    }
+    await createWindow();
 
-app.on('before-quit', () => {
-  if (backendProcess) backendProcess.kill();
-});
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
+
+  app.on('window-all-closed', () => {
+    if (backendProcess) backendProcess.kill();
+    if (staticServer) staticServer.close();
+    if (process.platform !== 'darwin') app.quit();
+  });
+
+  app.on('before-quit', () => {
+    if (backendProcess) backendProcess.kill();
+  });
+}
