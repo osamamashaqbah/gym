@@ -11,6 +11,16 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Desktop (Electron) build: use a per-user SQLite file instead of requiring a Postgres server.
+var isSqlite = string.Equals(builder.Configuration["Database:Provider"], "Sqlite", StringComparison.OrdinalIgnoreCase);
+if (isSqlite)
+{
+    var dataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GymManagement");
+    Directory.CreateDirectory(dataDir);
+    var dbPath = Path.Combine(dataDir, "gym.db");
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = $"Data Source={dbPath}";
+}
+
 // Layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -59,7 +69,11 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
-    try { await DataSeeder.SeedAsync(db, hasher); }
+    try
+    {
+        if (isSqlite) await db.Database.EnsureCreatedAsync();
+        await DataSeeder.SeedAsync(db, hasher);
+    }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();

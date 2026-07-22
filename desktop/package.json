@@ -1,0 +1,53 @@
+{
+  "name": "gym-management-desktop",
+  "version": "1.0.0",
+  "description": "Iron Forge Gym Management — desktop app",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:packager": "electron-packager . \"Iron Forge Gym Management\" --platform=win32 --arch=x64 --out=dist-packager --overwrite --ignore=dist-electron --ignore=dist-packager --ignore=node_modules/electron-builder --ignore=node_modules/app-builder-bin --ignore=node_modules/7zip-bin --ignore=node_modules/electron-packager"
+  },
+  "devDependencies": {
+    "electron": "^31.3.0",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
+  },
+  "build": {
+    "appId": "com.ironforge.gym",
+    "productName": "Iron Forge Gym Management",
+    "asar": true,
+    "files": [
+      "main.js",
+      "package.json",
+      "resources/frontend/**"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/backend",
+        "to": "backend"
+      }
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ]
+    },
+    "portable": {
+      "artifactName": "IronForgeGym-Portable.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "IronForgeGym-Setup.exe"
+    },
+    "directories": {
+      "output": "dist-electron2"
+    }
+  },
+  "allowScripts": {
+    "electron@31.7.7": true
+  }
+}

@@ -95,13 +95,15 @@ public class DashboardService : IDashboardService
             .ToList();
 
         // Popular plans
-        var planGroups = await _db.Memberships
-            .Include(m => m.Plan)
+        var planGroupsRaw = await _db.Memberships
             .GroupBy(m => m.Plan.Name)
-            .Select(g => new PlanPopularityDto(g.Key, g.Count()))
+            .Select(g => new { Name = g.Key, Count = g.Count() })
+            .ToListAsync(ct);
+        var planGroups = planGroupsRaw
+            .Select(x => new PlanPopularityDto(x.Name, x.Count))
             .OrderByDescending(g => g.Count)
             .Take(5)
-            .ToListAsync(ct);
+            .ToList();
 
         return new DashboardChartsDto(revenueLast12, attendanceLast7, distribution, planGroups);
     }

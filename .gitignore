@@ -42,3 +42,9 @@ coverage/
 .parcel-cache/
 .tmp/
 *.tsbuildinfo
+
+# Electron desktop build output
+desktop/resources/
+desktop/dist-electron/
+desktop/dist-electron2/
+desktop/dist-packager/

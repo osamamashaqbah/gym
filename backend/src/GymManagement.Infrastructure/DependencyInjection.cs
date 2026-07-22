@@ -17,9 +17,15 @@ public static class DependencyInjection
     {
         var connectionString = config.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is missing.");
+        var provider = config["Database:Provider"] ?? "Postgres";
 
         services.AddDbContext<ApplicationDbContext>(opt =>
-            opt.UseNpgsql(connectionString, npg => npg.MigrationsAssembly("GymManagement.Infrastructure")));
+        {
+            if (string.Equals(provider, "Sqlite", StringComparison.OrdinalIgnoreCase))
+                opt.UseSqlite(connectionString);
+            else
+                opt.UseNpgsql(connectionString, npg => npg.MigrationsAssembly("GymManagement.Infrastructure"));
+        });
         services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.AddHttpContextAccessor();
