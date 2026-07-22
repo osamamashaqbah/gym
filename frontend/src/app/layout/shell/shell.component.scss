@@ -77,16 +77,16 @@
 }
 .nav-item.active {
   color: var(--text-1);
-  background: linear-gradient(135deg, rgba(216,218,223,.08), rgba(216,218,223,.02));
-  border-color: var(--border);
+  background: linear-gradient(135deg, rgba(212,169,74,.10), rgba(212,169,74,.02));
+  border-color: rgba(212,169,74,.25);
   box-shadow: 0 4px 16px rgba(0,0,0,.3) inset, 0 0 0 1px rgba(255,255,255,.04) inset;
 }
 .nav-item.active .nav-active-indicator {
   position: absolute; left: -14px; top: 50%; transform: translateY(-50%);
   width: 3px; height: 22px;
-  background: var(--silver-grad);
+  background: var(--gold-grad);
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 12px rgba(216,218,223,.6);
+  box-shadow: 0 0 12px rgba(212,169,74,.6);
 }
 .nav-icon { font-size: 20px; flex-shrink: 0; }
 .nav-label { letter-spacing: .01em; }

@@ -17,8 +17,8 @@
   filter: blur(80px);
   opacity: .55;
 }
-.orb-1 { width: 480px; height: 480px; background: radial-gradient(circle, rgba(46,160,255,.6), transparent 70%); top: -120px; right: -100px; }
-.orb-2 { width: 580px; height: 580px; background: radial-gradient(circle, rgba(255,166,48,.45), transparent 70%); bottom: -180px; left: -160px; }
+.orb-1 { width: 480px; height: 480px; background: radial-gradient(circle, rgba(212,169,74,.5), transparent 70%); top: -120px; right: -100px; }
+.orb-2 { width: 580px; height: 580px; background: radial-gradient(circle, rgba(46,160,255,.35), transparent 70%); bottom: -180px; left: -160px; }
 .grid {
   position: absolute; inset: 0;
   background-image:
@@ -47,11 +47,11 @@
 .brand-mark {
   width: 52px; height: 52px;
   border-radius: 14px;
-  background: var(--silver-grad);
+  background: var(--gold-grad);
   display: grid; place-items: center;
   color: #0a0a0c;
-  box-shadow: 0 0 30px rgba(216,218,223,.25);
-  border: 1px solid #d8dadf;
+  box-shadow: var(--gold-glow);
+  border: 1px solid #e0b563;
 }
 .brand-mark .material-icons-round { font-size: 26px; }
 .brand-name {
@@ -59,7 +59,7 @@
   font-weight: 700;
   letter-spacing: .25em;
   font-size: 16px;
-  background: var(--silver-grad);
+  background: var(--gold-grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

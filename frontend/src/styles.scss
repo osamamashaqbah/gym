@@ -48,6 +48,14 @@
   --orange-soft:    rgba(255, 166, 48, 0.14);
   --orange-glow:    0 0 24px rgba(255, 166, 48, 0.4);
 
+  /* Signature accent — Iron Forge gold */
+  --gold-1:         #f5cf7e;
+  --gold-2:         #d4a94a;
+  --gold-3:         #9c7a2e;
+  --gold-grad:      linear-gradient(135deg, #f8dfa0 0%, #e0b563 30%, #b4842f 65%, #e0b563 100%);
+  --gold-soft:      rgba(212, 169, 74, 0.14);
+  --gold-glow:      0 0 24px rgba(212, 169, 74, 0.45);
+
   /* Effects */
   --shadow-1:       0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.5);
   --shadow-2:       0 8px 32px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.5);
