@@ -32,6 +32,7 @@ export class ApiService {
   updateMember(id: string, body: UpdateMemberRequest) { return this.http.put<MemberDto>(`${this.base}/members/${id}`, body); }
   archiveMember(id: string) { return this.http.post(`${this.base}/members/${id}/archive`, {}); }
   deleteMember(id: string) { return this.http.delete(`${this.base}/members/${id}`); }
+  memberQrCodeUrl(id: string) { return `${this.base}/members/${id}/qrcode`; }
 
   // ---------- Memberships
   getPlans() { return this.http.get<MembershipPlanDto[]>(`${this.base}/memberships/plans`); }

@@ -32,6 +32,11 @@ import { AttendanceDto, MemberDto, PagedResult } from '../../core/models/models'
             <input class="input lg" placeholder="Search member..." [value]="query()" (input)="onSearch($event)" autofocus />
           </div>
 
+          <div class="search-shell" style="margin-top:12px;">
+            <span class="material-icons-round search-icon">qr_code_scanner</span>
+            <input class="input lg" placeholder="Scan member QR code..." [value]="qrInput()" (input)="onQrInput($event)" />
+          </div>
+
           @if (query() && results().length > 0) {
             <div class="results">
               @for (m of results(); track m.id) {
@@ -170,6 +175,7 @@ export class AttendanceComponent {
   private toast = inject(ToastService);
 
   query = signal('');
+  qrInput = signal('');
   searching = signal(false);
   checking = signal<string | null>(null);
   results = signal<MemberDto[]>([]);
@@ -197,6 +203,25 @@ export class AttendanceComponent {
     this.query.set(v);
     if (!v.trim()) { this.results.set([]); return; }
     this.subj.next(v);
+  }
+
+  onQrInput(e: Event) {
+    const v = (e.target as HTMLInputElement).value;
+    this.qrInput.set(v);
+    const match = v.trim().match(/^GYM-MEMBER:([0-9a-fA-F-]{36})$/);
+    if (!match) return;
+    const memberId = match[1];
+    this.qrInput.set('');
+    this.checking.set(memberId);
+    this.api.checkIn(memberId).subscribe({
+      next: (a) => {
+        this.toast.success(`${a.memberName} checked in!`);
+        this.checking.set(null);
+        this.loadToday();
+        this.loadRecent();
+      },
+      error: () => this.checking.set(null)
+    });
   }
 
   loadToday() {

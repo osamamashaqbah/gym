@@ -3,6 +3,7 @@ using GymManagement.Application.DTOs.Members;
 using GymManagement.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using QRCoder;
 
 namespace GymManagement.Api.Controllers;
 
@@ -56,5 +57,17 @@ public class MembersController : ControllerBase
     {
         var r = await _service.DeleteAsync(id, ct);
         return r.Success ? NoContent() : StatusCode(r.StatusCode, new { error = r.Error });
+    }
+
+    [HttpGet("{id:guid}/qrcode")]
+    public async Task<IActionResult> QrCode(Guid id, CancellationToken ct)
+    {
+        var dto = await _service.GetByIdAsync(id, ct);
+        if (dto is null) return NotFound();
+
+        using var generator = new QRCodeGenerator();
+        using var data = generator.CreateQrCode($"GYM-MEMBER:{id}", QRCodeGenerator.ECCLevel.Q);
+        var png = new PngByteQRCode(data).GetGraphic(10);
+        return File(png, "image/png");
     }
 }

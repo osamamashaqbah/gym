@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using GymManagement.Api.Middleware;
+using GymManagement.Api.Services;
 using GymManagement.Application;
 using GymManagement.Application.Interfaces;
 using GymManagement.Application.Validators;
@@ -18,6 +19,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
+builder.Services.AddHostedService<ExpiryAlertBackgroundService>();
 
 // CORS
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()

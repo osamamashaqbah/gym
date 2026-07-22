@@ -119,4 +119,22 @@ export class MemberProfileComponent {
   printInvoice(p: PaymentDto) {
     window.open(this.api.invoiceHtmlUrl(p.id), '_blank');
   }
+
+  qrCodeUrl() {
+    return this.member() ? this.api.memberQrCodeUrl(this.member()!.id) : '';
+  }
+
+  printQrCode() {
+    const url = this.qrCodeUrl();
+    if (!url) return;
+    const w = window.open('', '_blank');
+    if (!w) return;
+    w.document.write(`<html><head><title>Member QR</title></head>
+      <body style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">
+        <img src="${url}" style="width:280px;height:280px;" />
+        <h2>${this.member()?.fullName ?? ''}</h2>
+        <script>window.onload = () => window.print();</script>
+      </body></html>`);
+    w.document.close();
+  }
 }
