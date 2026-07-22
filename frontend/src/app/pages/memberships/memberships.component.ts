@@ -177,7 +177,7 @@ export class MembershipsComponent {
 
   edit(p: MembershipPlanDto) {
     this.editing.set(p);
-    this.form.patchValue(p);
+    this.form.patchValue({ ...p, description: p.description ?? '' });
     this.showDialog.set(true);
   }
 

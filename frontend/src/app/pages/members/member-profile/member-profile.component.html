@@ -1,10 +1,5 @@
 <div class="page fade-in">
-  @if (loading()) {
-    <div class="card" style="display:flex;align-items:center;justify-content:center;padding:80px;gap:14px;">
-      <span class="spinner"></span>
-      <span>Loading member profile...</span>
-    </div>
-  } @else if (member(); as m) {
+  @if (member(); as m) {
     <a routerLink="/members" class="back-link">
       <span class="material-icons-round">arrow_back</span> Back to members
     </a>
@@ -173,5 +168,10 @@
     @if (showPayment() && member()) {
       <app-payment-dialog [memberId]="member()!.id" [memberships]="memberships()" (close)="showPayment.set(false)" (saved)="onPaymentCreated()" />
     }
+  } @else if (loading()) {
+    <div class="card" style="display:flex;align-items:center;justify-content:center;padding:80px;gap:14px;">
+      <span class="spinner"></span>
+      <span>Loading member profile...</span>
+    </div>
   }
 </div>
